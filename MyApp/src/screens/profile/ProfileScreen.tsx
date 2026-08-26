@@ -1,8 +1,8 @@
 /**
- * Profile Screen
+ * Modern Profile Screen
  *
- * Displays user profile from GET /api/auth/profile.
- * Handles loading, error, retry states.
+ * Polished profile screen displaying verified user information,
+ * Lucide item icons, pull-to-refresh, and quick actions.
  */
 
 import React, {useState, useEffect, useCallback} from 'react';
@@ -10,7 +10,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
@@ -25,6 +24,7 @@ import authApi from '../../api/authApi';
 import UserAvatar from '../../components/UserAvatar';
 import Button from '../../components/Button';
 import ErrorMessage from '../../components/ErrorMessage';
+import Icon from '../../components/Icon';
 import {Colors, Typography, Spacing, Shadows} from '../../theme/theme';
 import {User} from '../../types/auth';
 import {extractApiError} from '../../utils/errorHandler';
@@ -87,18 +87,18 @@ const ProfileScreen: React.FC = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
     });
   };
 
-  // Loading state
+  // Initial loading state
   if (loading && !profile) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+          <Text style={styles.loadingText}>Loading profile details...</Text>
         </View>
       </SafeAreaView>
     );
@@ -119,8 +119,10 @@ const ProfileScreen: React.FC = () => {
             tintColor={Colors.primary}
           />
         }>
-        {/* ─── Header ────────────────────────────────────────────── */}
-        <Text style={styles.screenTitle}>Profile</Text>
+        {/* ─── Screen Header ─────────────────────────────────────── */}
+        <View style={styles.header}>
+          <Text style={styles.screenTitle}>My Profile</Text>
+        </View>
 
         {/* ─── Error Banner ──────────────────────────────────────── */}
         {error ? (
@@ -131,15 +133,20 @@ const ProfileScreen: React.FC = () => {
           />
         ) : null}
 
-        {/* ─── Avatar Section ────────────────────────────────────── */}
-        <View style={styles.avatarSection}>
-          <UserAvatar name={displayProfile?.name || 'User'} size={96} />
+        {/* ─── Hero Avatar Card ──────────────────────────────────── */}
+        <View style={[styles.avatarCard, Shadows.card]}>
+          <UserAvatar
+            name={displayProfile?.name || 'User'}
+            size={84}
+            showRing
+          />
           <Text style={styles.profileName}>
-            {displayProfile?.name || '—'}
+            {displayProfile?.name || 'User'}
           </Text>
           <Text style={styles.profileEmail}>
             {displayProfile?.email || '—'}
           </Text>
+
           <View style={styles.badgeRow}>
             <View style={styles.roleBadge}>
               <Text style={styles.roleBadgeText}>
@@ -153,6 +160,12 @@ const ProfileScreen: React.FC = () => {
                   ? styles.statusBadgeVerified
                   : styles.statusBadgePending,
               ]}>
+              <Icon
+                name={displayProfile?.isVerified ? 'ShieldCheck' : 'Clock'}
+                size={13}
+                color={displayProfile?.isVerified ? Colors.successDark : Colors.warningDark}
+                style={{marginRight: 4}}
+              />
               <Text
                 style={[
                   styles.statusBadgeText,
@@ -160,46 +173,61 @@ const ProfileScreen: React.FC = () => {
                     ? styles.statusTextVerified
                     : styles.statusTextPending,
                 ]}>
-                {displayProfile?.isVerified ? '✓ Verified' : 'Unverified'}
+                {displayProfile?.isVerified ? 'Verified Account' : 'Pending Verification'}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* ─── Info Card ─────────────────────────────────────────── */}
-        <View style={[styles.card]}>
-          <Text style={styles.cardTitle}>Account Information</Text>
+        {/* ─── Account Information Card ──────────────────────────── */}
+        <View style={[styles.card, Shadows.card]}>
+          <Text style={styles.cardSectionTitle}>Account Details</Text>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Full Name</Text>
+            <View style={styles.infoLabelContainer}>
+              <Icon name="User" size={16} color={Colors.textTertiary} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Full Name</Text>
+            </View>
             <Text style={styles.infoValue}>
               {displayProfile?.name || '—'}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Email Address</Text>
-            <Text style={styles.infoValue}>
+            <View style={styles.infoLabelContainer}>
+              <Icon name="Mail" size={16} color={Colors.textTertiary} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Email Address</Text>
+            </View>
+            <Text style={styles.infoValue} numberOfLines={1}>
               {displayProfile?.email || '—'}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Phone Number</Text>
+            <View style={styles.infoLabelContainer}>
+              <Icon name="Phone" size={16} color={Colors.textTertiary} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Phone Number</Text>
+            </View>
             <Text style={styles.infoValue}>
               {displayProfile?.phone || '—'}
             </Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Member Since</Text>
+            <View style={styles.infoLabelContainer}>
+              <Icon name="Calendar" size={16} color={Colors.textTertiary} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Member Since</Text>
+            </View>
             <Text style={styles.infoValue}>
               {formatDate(displayProfile?.createdAt)}
             </Text>
           </View>
 
           <View style={[styles.infoRow, styles.infoRowLast]}>
-            <Text style={styles.infoLabel}>Last Updated</Text>
+            <View style={styles.infoLabelContainer}>
+              <Icon name="Clock" size={16} color={Colors.textTertiary} style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Last Updated</Text>
+            </View>
             <Text style={styles.infoValue}>
               {formatDate(displayProfile?.updatedAt)}
             </Text>
@@ -212,13 +240,13 @@ const ProfileScreen: React.FC = () => {
             title="Edit Profile"
             onPress={() => navigation.navigate('EditProfile')}
             variant="primary"
-            style={styles.actionButton}
+            leftIcon="Edit3"
           />
           <Button
             title="Sign Out"
             onPress={handleLogout}
             variant="outline"
-            style={styles.actionButton}
+            leftIcon="LogOut"
           />
         </View>
       </ScrollView>
@@ -238,34 +266,41 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...Typography.styles.caption,
-    color: Colors.textTertiary,
-    marginTop: Spacing.lg,
+    color: Colors.textSecondary,
+    marginTop: Spacing.md,
   },
   scrollContent: {
     paddingHorizontal: Spacing.screenHorizontal,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxxl,
+  },
+  header: {
+    marginBottom: Spacing.lg,
   },
   screenTitle: {
     ...Typography.styles.heading1,
     color: Colors.textPrimary,
-    marginBottom: Spacing.xxl,
   },
 
-  // Avatar Section
-  avatarSection: {
+  // Avatar Card
+  avatarCard: {
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.borderRadius.xl,
+    padding: Spacing.xl,
     alignItems: 'center',
-    marginBottom: Spacing.sectionGap,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.lg,
   },
   profileName: {
-    ...Typography.styles.heading3,
+    ...Typography.styles.heading2,
     color: Colors.textPrimary,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
   },
   profileEmail: {
     ...Typography.styles.body,
     color: Colors.textSecondary,
-    marginTop: Spacing.xxs,
+    marginTop: 2,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -275,8 +310,10 @@ const styles = StyleSheet.create({
   roleBadge: {
     backgroundColor: Colors.primaryFaded,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: 3,
     borderRadius: Spacing.borderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
   },
   roleBadgeText: {
     ...Typography.styles.small,
@@ -285,70 +322,83 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: 3,
     borderRadius: Spacing.borderRadius.full,
   },
   statusBadgeVerified: {
     backgroundColor: Colors.successLight,
+    borderWidth: 1,
+    borderColor: Colors.successBorder,
   },
   statusBadgePending: {
     backgroundColor: Colors.warningLight,
+    borderWidth: 1,
+    borderColor: Colors.warningBorder,
   },
   statusBadgeText: {
     ...Typography.styles.small,
     fontWeight: Typography.weights.semibold,
-    letterSpacing: 0.5,
   },
   statusTextVerified: {
-    color: Colors.success,
+    color: Colors.successDark,
   },
   statusTextPending: {
-    color: Colors.warning,
+    color: Colors.warningDark,
   },
 
   // Info Card
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.white,
     borderRadius: Spacing.borderRadius.lg,
     padding: Spacing.cardPadding,
-    ...Shadows.sm,
-    marginBottom: Spacing.sectionGap,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.xl,
   },
-  cardTitle: {
+  cardSectionTitle: {
     ...Typography.styles.bodySemibold,
     color: Colors.textPrimary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: Colors.borderLight,
   },
   infoRowLast: {
     borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  infoLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoIcon: {
+    marginRight: Spacing.sm,
   },
   infoLabel: {
     ...Typography.styles.caption,
-    color: Colors.textTertiary,
-    flex: 1,
+    color: Colors.textSecondary,
   },
   infoValue: {
-    ...Typography.styles.captionMedium,
+    ...Typography.styles.bodyMedium,
     color: Colors.textPrimary,
-    flex: 1.5,
+    maxWidth: '55%',
     textAlign: 'right',
   },
 
   // Actions
   actionsSection: {
     gap: Spacing.md,
-  },
-  actionButton: {
-    marginBottom: 0,
   },
 });
 

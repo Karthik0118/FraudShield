@@ -1,12 +1,12 @@
 /**
  * App Navigator
  *
- * Bottom tab navigator for authenticated screens.
- * Each tab has its own nested stack for drill-down navigation.
+ * Polished Bottom Tab Navigator using Lucide icons.
+ * Nested stack navigators for Home, Profile, and Settings.
  */
 
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Platform} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from '../screens/home/HomeScreen';
@@ -14,9 +14,8 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
-import {Colors, Typography, Spacing} from '../theme/theme';
-
-// ─── Param Lists ────────────────────────────────────────────────────────────
+import {Colors, Typography, Spacing, Shadows} from '../theme/theme';
+import Icon, {IconName} from '../components/Icon';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -35,32 +34,20 @@ export type SettingsStackParamList = {
 // ─── Tab Icon Component ─────────────────────────────────────────────────────
 
 interface TabIconProps {
-  emoji: string;
+  name: IconName;
   focused: boolean;
-  label: string;
 }
 
-const TabIcon: React.FC<TabIconProps> = ({emoji, focused, label}) => (
-  <View style={tabIconStyles.container}>
-    <Text style={[tabIconStyles.emoji, focused && tabIconStyles.emojiFocused]}>
-      {emoji}
-    </Text>
+const TabBarIcon: React.FC<TabIconProps> = ({name, focused}) => (
+  <View style={[styles.iconWrapper, focused && styles.iconWrapperFocused]}>
+    <Icon
+      name={name}
+      size={22}
+      color={focused ? Colors.primary : Colors.textTertiary}
+      strokeWidth={focused ? 2.5 : 2}
+    />
   </View>
 );
-
-const tabIconStyles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emoji: {
-    fontSize: 22,
-    opacity: 0.5,
-  },
-  emojiFocused: {
-    opacity: 1,
-  },
-});
 
 // ─── Shared Stack Options ───────────────────────────────────────────────────
 
@@ -71,6 +58,7 @@ const stackScreenOptions = {
   headerTintColor: Colors.textPrimary,
   headerTitleStyle: {
     ...Typography.styles.bodySemibold,
+    color: Colors.textPrimary,
   },
   headerShadowVisible: false,
   contentStyle: {backgroundColor: Colors.background},
@@ -101,7 +89,7 @@ const ProfileStackScreen: React.FC = () => (
     <ProfileStack.Screen
       name="EditProfile"
       component={EditProfileScreen}
-      options={{title: 'Edit Profile'}}
+      options={{title: 'Edit Profile', headerBackTitle: 'Profile'}}
     />
   </ProfileStack.Navigator>
 );
@@ -120,7 +108,7 @@ const SettingsStackScreen: React.FC = () => (
     <SettingsStack.Screen
       name="ChangePassword"
       component={ChangePasswordScreen}
-      options={{title: 'Change Password'}}
+      options={{title: 'Change Password', headerBackTitle: 'Settings'}}
     />
   </SettingsStack.Navigator>
 );
@@ -144,8 +132,9 @@ const AppNavigator: React.FC = () => {
         name="Home"
         component={HomeStackScreen}
         options={{
+          tabBarLabel: 'Home',
           tabBarIcon: ({focused}) => (
-            <TabIcon emoji="🏠" focused={focused} label="Home" />
+            <TabBarIcon name="Home" focused={focused} />
           ),
         }}
       />
@@ -153,8 +142,9 @@ const AppNavigator: React.FC = () => {
         name="Profile"
         component={ProfileStackScreen}
         options={{
+          tabBarLabel: 'Profile',
           tabBarIcon: ({focused}) => (
-            <TabIcon emoji="👤" focused={focused} label="Profile" />
+            <TabBarIcon name="User" focused={focused} />
           ),
         }}
       />
@@ -162,8 +152,9 @@ const AppNavigator: React.FC = () => {
         name="Settings"
         component={SettingsStackScreen}
         options={{
+          tabBarLabel: 'Settings',
           tabBarIcon: ({focused}) => (
-            <TabIcon emoji="⚙️" focused={focused} label="Settings" />
+            <TabBarIcon name="Settings" focused={focused} />
           ),
         }}
       />
@@ -175,16 +166,25 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: Colors.surface,
     borderTopColor: Colors.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: 1,
     paddingTop: Spacing.xs,
-    paddingBottom: Spacing.sm,
-    height: 60,
-    elevation: 8,
+    paddingBottom: Platform.OS === 'ios' ? Spacing.lg : Spacing.sm,
+    height: Platform.OS === 'ios' ? 82 : 64,
+    ...Shadows.md,
   },
   tabBarLabel: {
     ...Typography.styles.small,
     fontWeight: Typography.weights.medium,
     marginTop: 2,
+  },
+  iconWrapper: {
+    padding: 4,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapperFocused: {
+    backgroundColor: Colors.primaryFaded,
   },
 });
 

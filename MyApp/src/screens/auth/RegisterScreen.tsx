@@ -1,9 +1,8 @@
 /**
- * Register Screen
+ * Modern Register Screen
  *
- * Full registration form with name, email, phone, password, confirm password.
- * Client-side validation matching backend rules.
- * Auto-login on successful registration (backend returns tokens).
+ * Polished registration experience with Lucide input icons, real-time
+ * password strength checklist, card-based layout, and validation.
  */
 
 import React, {useState} from 'react';
@@ -22,7 +21,8 @@ import {useAuth} from '../../context/AuthContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import ErrorMessage from '../../components/ErrorMessage';
-import {Colors, Typography, Spacing} from '../../theme/theme';
+import Icon from '../../components/Icon';
+import {Colors, Typography, Spacing, Shadows} from '../../theme/theme';
 import {
   validateName,
   validateEmail,
@@ -108,11 +108,8 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
     setLoading(true);
     try {
       await register(name.trim(), email.trim(), phone.trim(), password);
-      // Auto-login: backend returns tokens on register.
-      // Navigation happens automatically via RootNavigator.
     } catch (err: any) {
       const apiError = extractApiError(err);
-      // If backend returns field-specific validation errors, map them
       if (apiError.validationErrors) {
         const fieldMap: FieldErrors = {};
         apiError.validationErrors.forEach(ve => {
@@ -128,6 +125,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
     }
   };
 
+  const isMinLength = password.length >= 6;
+  const hasNumber = /\d/.test(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -139,119 +140,175 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
         showsVerticalScrollIndicator={false}>
         {/* ─── Header ───────────────────────────────────────────── */}
         <View style={styles.headerSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            accessibilityRole="button"
+            accessibilityLabel="Back to sign in">
+            <Icon name="ChevronLeft" size={20} color={Colors.textSecondary} />
+            <Text style={styles.backText}>Sign In</Text>
+          </TouchableOpacity>
           <Text style={styles.heading}>Create Account</Text>
           <Text style={styles.subheading}>
             Join FraudShield to protect your transactions
           </Text>
         </View>
 
-        {/* ─── Error Banner ──────────────────────────────────────── */}
-        {error ? (
-          <ErrorMessage message={error} onDismiss={() => setError('')} />
-        ) : null}
+        {/* ─── Form Card ────────────────────────────────────────── */}
+        <View style={[styles.card, Shadows.card]}>
+          {/* ─── Error Banner ──────────────────────────────────── */}
+          {error ? (
+            <ErrorMessage message={error} onDismiss={() => setError('')} />
+          ) : null}
 
-        {/* ─── Form ──────────────────────────────────────────────── */}
-        <Input
-          label="Full Name"
-          placeholder="Enter your full name"
-          value={name}
-          onChangeText={text => {
-            setName(text);
-            clearFieldError('name');
-          }}
-          error={fieldErrors.name}
-          autoCapitalize="words"
-          returnKeyType="next"
-        />
+          {/* ─── Form Fields ───────────────────────────────────── */}
+          <Input
+            label="Full Name"
+            placeholder="John Doe"
+            value={name}
+            onChangeText={text => {
+              setName(text);
+              clearFieldError('name');
+            }}
+            error={fieldErrors.name}
+            leftIcon="User"
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
 
-        <Input
-          label="Email"
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-            clearFieldError('email');
-          }}
-          error={fieldErrors.email}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="next"
-        />
+          <Input
+            label="Email Address"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={text => {
+              setEmail(text);
+              clearFieldError('email');
+            }}
+            error={fieldErrors.email}
+            leftIcon="Mail"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+          />
 
-        <Input
-          label="Phone Number"
-          placeholder="+919876543210"
-          value={phone}
-          onChangeText={text => {
-            setPhone(text);
-            clearFieldError('phone');
-          }}
-          error={fieldErrors.phone}
-          keyboardType="phone-pad"
-          returnKeyType="next"
-        />
+          <Input
+            label="Phone Number"
+            placeholder="+91 98765 43210"
+            value={phone}
+            onChangeText={text => {
+              setPhone(text);
+              clearFieldError('phone');
+            }}
+            error={fieldErrors.phone}
+            leftIcon="Phone"
+            keyboardType="phone-pad"
+            returnKeyType="next"
+          />
 
-        <Input
-          label="Password"
-          placeholder="Min 6 characters, include a number"
-          value={password}
-          onChangeText={text => {
-            setPassword(text);
-            clearFieldError('password');
-          }}
-          error={fieldErrors.password}
-          isPassword
-          returnKeyType="next"
-        />
+          <Input
+            label="Password"
+            placeholder="Create password"
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+              clearFieldError('password');
+            }}
+            error={fieldErrors.password}
+            leftIcon="Lock"
+            isPassword
+            returnKeyType="next"
+          />
 
-        <Input
-          label="Confirm Password"
-          placeholder="Re-enter your password"
-          value={confirmPassword}
-          onChangeText={text => {
-            setConfirmPassword(text);
-            clearFieldError('confirmPassword');
-          }}
-          error={fieldErrors.confirmPassword}
-          isPassword
-          returnKeyType="done"
-          onSubmitEditing={handleRegister}
-        />
+          <Input
+            label="Confirm Password"
+            placeholder="Re-enter password"
+            value={confirmPassword}
+            onChangeText={text => {
+              setConfirmPassword(text);
+              clearFieldError('confirmPassword');
+            }}
+            error={fieldErrors.confirmPassword}
+            leftIcon="Lock"
+            isPassword
+            returnKeyType="done"
+            onSubmitEditing={handleRegister}
+          />
 
-        {/* ─── Password Requirements ─────────────────────────────── */}
-        <View style={styles.requirementsContainer}>
-          <Text style={styles.requirementsTitle}>Password requirements:</Text>
-          <Text
-            style={[
-              styles.requirement,
-              password.length >= 6 && styles.requirementMet,
-            ]}>
-            {password.length >= 6 ? '✓' : '○'} At least 6 characters
-          </Text>
-          <Text
-            style={[
-              styles.requirement,
-              /\d/.test(password) && styles.requirementMet,
-            ]}>
-            {/\d/.test(password) ? '✓' : '○'} Contains at least one number
-          </Text>
+          {/* ─── Password Checklist ─────────────────────────────── */}
+          <View style={styles.requirementsContainer}>
+            <Text style={styles.requirementsTitle}>Password criteria</Text>
+            
+            <View style={styles.requirementRow}>
+              <Icon
+                name={isMinLength ? 'CheckCircle2' : 'Clock'}
+                size={14}
+                color={isMinLength ? Colors.success : Colors.textTertiary}
+                style={{marginRight: 6}}
+              />
+              <Text
+                style={[
+                  styles.requirementText,
+                  isMinLength && styles.requirementMetText,
+                ]}>
+                At least 6 characters
+              </Text>
+            </View>
+
+            <View style={styles.requirementRow}>
+              <Icon
+                name={hasNumber ? 'CheckCircle2' : 'Clock'}
+                size={14}
+                color={hasNumber ? Colors.success : Colors.textTertiary}
+                style={{marginRight: 6}}
+              />
+              <Text
+                style={[
+                  styles.requirementText,
+                  hasNumber && styles.requirementMetText,
+                ]}>
+                Contains at least one number
+              </Text>
+            </View>
+
+            {confirmPassword.length > 0 && (
+              <View style={styles.requirementRow}>
+                <Icon
+                  name={passwordsMatch ? 'CheckCircle2' : 'AlertCircle'}
+                  size={14}
+                  color={passwordsMatch ? Colors.success : Colors.error}
+                  style={{marginRight: 6}}
+                />
+                <Text
+                  style={[
+                    styles.requirementText,
+                    passwordsMatch && styles.requirementMetText,
+                    !passwordsMatch && styles.requirementFailText,
+                  ]}>
+                  {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* ─── Register Button ───────────────────────────────── */}
+          <Button
+            title="Create Account"
+            onPress={handleRegister}
+            loading={loading}
+            rightIcon="ArrowRight"
+            style={styles.registerButton}
+          />
         </View>
-
-        {/* ─── Register Button ───────────────────────────────────── */}
-        <Button
-          title="Create Account"
-          onPress={handleRegister}
-          loading={loading}
-          style={styles.registerButton}
-        />
 
         {/* ─── Login Link ────────────────────────────────────────── */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            disabled={loading}>
+            disabled={loading}
+            hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
             <Text style={styles.linkText}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -268,42 +325,75 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.screenHorizontal,
-    paddingTop: Spacing.xxxxl,
+    paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxxl,
   },
   headerSection: {
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.xl,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    alignSelf: 'flex-start',
+  },
+  backText: {
+    ...Typography.styles.bodyMedium,
+    color: Colors.textSecondary,
+    marginLeft: 2,
   },
   heading: {
     ...Typography.styles.heading1,
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.xxs,
   },
   subheading: {
     ...Typography.styles.body,
     color: Colors.textSecondary,
   },
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.borderRadius.xl,
+    padding: Spacing.cardPadding,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.xl,
+  },
   requirementsContainer: {
     backgroundColor: Colors.surfaceSecondary,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     borderRadius: Spacing.borderRadius.md,
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   requirementsTitle: {
-    ...Typography.styles.captionMedium,
+    ...Typography.styles.small,
+    fontWeight: Typography.weights.semibold,
     color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: Spacing.xs,
   },
-  requirement: {
+  requirementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.xs,
+  },
+  requirementText: {
     ...Typography.styles.caption,
     color: Colors.textTertiary,
-    marginBottom: Spacing.xxs,
   },
-  requirementMet: {
-    color: Colors.success,
+  requirementMetText: {
+    color: Colors.successDark,
+    fontWeight: Typography.weights.medium,
+  },
+  requirementFailText: {
+    color: Colors.errorDark,
+    fontWeight: Typography.weights.medium,
   },
   registerButton: {
-    marginBottom: Spacing.xxl,
+    marginTop: Spacing.xs,
   },
   footer: {
     flexDirection: 'row',

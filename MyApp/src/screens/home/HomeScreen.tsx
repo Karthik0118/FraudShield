@@ -1,11 +1,11 @@
 /**
- * Home Screen
+ * Modern Home / Dashboard Screen
  *
- * Dashboard with personalized greeting, user info card,
- * quick actions, and placeholder for future modules.
+ * Polished dashboard featuring personalized greeting, account overview card,
+ * Insecure HTTP URL Protection status card, and quick actions.
  */
 
-import React from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -13,16 +13,29 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  AppState,
+  AppStateStatus,
+  Platform,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, CommonActions} from '@react-navigation/native';
 import {useAuth} from '../../context/AuthContext';
 import UserAvatar from '../../components/UserAvatar';
+import Button from '../../components/Button';
+import Icon, {IconName} from '../../components/Icon';
 import {Colors, Typography, Spacing, Shadows} from '../../theme/theme';
+import {
+  checkAllServiceStatus,
+  openAccessibilitySettings,
+  openOverlaySettings,
+  ServiceStatus,
+} from '../../utils/accessibilityService';
 
 interface QuickAction {
   id: string;
-  emoji: string;
+  icon: IconName;
+  iconBg: string;
+  iconColor: string;
   label: string;
   description: string;
   onPress: () => void;
@@ -32,11 +45,42 @@ const HomeScreen: React.FC = () => {
   const {user, logout} = useAuth();
   const navigation = useNavigation();
 
+  // Accessibility & Overlay status
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus>({
+    accessibilityEnabled: false,
+    overlayGranted: false,
+  });
+
+  const refreshStatus = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      const status = await checkAllServiceStatus();
+      setServiceStatus(status);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshStatus();
+
+    // Auto-refresh when returning to app from Android Settings
+    const subscription = AppState.addEventListener(
+      'change',
+      (nextState: AppStateStatus) => {
+        if (nextState === 'active') {
+          refreshStatus();
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [refreshStatus]);
+
   const getGreeting = (): string => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   };
 
   const firstName = user?.name?.split(' ')[0] || 'User';
@@ -62,31 +106,33 @@ const HomeScreen: React.FC = () => {
   const quickActions: QuickAction[] = [
     {
       id: 'profile',
-      emoji: '👤',
+      icon: 'User',
+      iconBg: Colors.primaryFaded,
+      iconColor: Colors.primary,
       label: 'My Profile',
-      description: 'View and manage your profile',
+      description: 'Account details & info',
       onPress: () => {
-        navigation.dispatch(
-          CommonActions.navigate({name: 'Profile'}),
-        );
+        navigation.dispatch(CommonActions.navigate({name: 'Profile'}));
       },
     },
     {
       id: 'settings',
-      emoji: '⚙️',
+      icon: 'Settings',
+      iconBg: '#F3E8FF',
+      iconColor: '#7C3AED',
       label: 'Settings',
-      description: 'App preferences and security',
+      description: 'Security & password',
       onPress: () => {
-        navigation.dispatch(
-          CommonActions.navigate({name: 'Settings'}),
-        );
+        navigation.dispatch(CommonActions.navigate({name: 'Settings'}));
       },
     },
     {
       id: 'logout',
-      emoji: '🚪',
+      icon: 'LogOut',
+      iconBg: Colors.errorLight,
+      iconColor: Colors.error,
       label: 'Sign Out',
-      description: 'Log out of your account',
+      description: 'End active session',
       onPress: handleLogout,
     },
   ];
@@ -100,47 +146,239 @@ const HomeScreen: React.FC = () => {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.greeting}>{getGreeting()},</Text>
-            <Text style={styles.userName}>{firstName} 👋</Text>
+            <Text style={styles.userName}>{firstName}</Text>
           </View>
           <TouchableOpacity
             onPress={() =>
               navigation.dispatch(CommonActions.navigate({name: 'Profile'}))
-            }>
-            <UserAvatar name={user?.name || 'User'} size={48} />
+            }
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Open profile">
+            <UserAvatar name={user?.name || 'User'} size={46} showRing />
           </TouchableOpacity>
         </View>
 
-        {/* ─── User Info Card ────────────────────────────────────── */}
-        <View style={[styles.card, styles.userCard]}>
-          <View style={styles.userCardHeader}>
-            <Text style={styles.cardTitle}>Account Overview</Text>
+        {/* ─── Insecure HTTP URL Protection Service Card ─────────── */}
+        {Platform.OS === 'android' && (
+          <View style={[styles.card, styles.protectionCard, Shadows.card]}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardHeaderTitleRow}>
+                <View style={styles.shieldIconBox}>
+                  <Icon
+                    name={
+                      serviceStatus.accessibilityEnabled &&
+                      serviceStatus.overlayGranted
+                        ? 'ShieldCheck'
+                        : 'Shield'
+                    }
+                    size={20}
+                    color={
+                      serviceStatus.accessibilityEnabled &&
+                      serviceStatus.overlayGranted
+                        ? Colors.successDark
+                        : Colors.primary
+                    }
+                    strokeWidth={2.5}
+                  />
+                </View>
+                <View style={{flex: 1}}>
+                  <Text style={styles.cardTitle}>Insecure HTTP Protection</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Real-time alert for unencrypted http:// links
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Accessibility Service Status */}
+            <View style={styles.serviceRow}>
+              <View style={styles.serviceInfoGroup}>
+                <Text style={styles.serviceLabel}>Accessibility Service</Text>
+                <View style={styles.statusPillRow}>
+                  <View
+                    style={[
+                      styles.statusPill,
+                      serviceStatus.accessibilityEnabled
+                        ? styles.statusPillActive
+                        : styles.statusPillInactive,
+                    ]}>
+                    <Icon
+                      name={
+                        serviceStatus.accessibilityEnabled
+                          ? 'CheckCircle2'
+                          : 'Clock'
+                      }
+                      size={12}
+                      color={
+                        serviceStatus.accessibilityEnabled
+                          ? Colors.successDark
+                          : Colors.warningDark
+                      }
+                      style={{marginRight: 4}}
+                    />
+                    <Text
+                      style={[
+                        styles.statusPillText,
+                        serviceStatus.accessibilityEnabled
+                          ? styles.statusTextActive
+                          : styles.statusTextInactive,
+                      ]}>
+                      {serviceStatus.accessibilityEnabled
+                        ? 'Enabled'
+                        : 'Disabled'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {!serviceStatus.accessibilityEnabled && (
+                <Button
+                  title="Enable"
+                  onPress={openAccessibilitySettings}
+                  size="sm"
+                  variant="primary"
+                  fullWidth={false}
+                  style={styles.actionBtn}
+                />
+              )}
+            </View>
+
+            {/* Display Over Other Apps Permission */}
+            <View style={[styles.serviceRow, styles.serviceRowLast]}>
+              <View style={styles.serviceInfoGroup}>
+                <Text style={styles.serviceLabel}>Display Over Other Apps</Text>
+                <View style={styles.statusPillRow}>
+                  <View
+                    style={[
+                      styles.statusPill,
+                      serviceStatus.overlayGranted
+                        ? styles.statusPillActive
+                        : styles.statusPillInactive,
+                    ]}>
+                    <Icon
+                      name={
+                        serviceStatus.overlayGranted
+                          ? 'CheckCircle2'
+                          : 'Clock'
+                      }
+                      size={12}
+                      color={
+                        serviceStatus.overlayGranted
+                          ? Colors.successDark
+                          : Colors.warningDark
+                      }
+                      style={{marginRight: 4}}
+                    />
+                    <Text
+                      style={[
+                        styles.statusPillText,
+                        serviceStatus.overlayGranted
+                          ? styles.statusTextActive
+                          : styles.statusTextInactive,
+                      ]}>
+                      {serviceStatus.overlayGranted
+                        ? 'Granted'
+                        : 'Permission Required'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {!serviceStatus.overlayGranted && (
+                <Button
+                  title="Grant"
+                  onPress={openOverlaySettings}
+                  size="sm"
+                  variant="secondary"
+                  fullWidth={false}
+                  style={styles.actionBtn}
+                />
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* ─── Account Overview Card ─────────────────────────────── */}
+        <View style={[styles.card, Shadows.card]}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderTitleRow}>
+              <Icon
+                name="ShieldCheck"
+                size={18}
+                color={Colors.primary}
+                style={{marginRight: 6}}
+              />
+              <Text style={styles.cardTitle}>Account Overview</Text>
+            </View>
             <View style={styles.roleBadge}>
               <Text style={styles.roleBadgeText}>
                 {user?.role?.toUpperCase() || 'USER'}
               </Text>
             </View>
           </View>
+
           <View style={styles.userInfoRow}>
-            <Text style={styles.userInfoLabel}>Email</Text>
-            <Text style={styles.userInfoValue}>{user?.email || '—'}</Text>
+            <View style={styles.infoLabelGroup}>
+              <Icon
+                name="Mail"
+                size={16}
+                color={Colors.textTertiary}
+                style={{marginRight: 8}}
+              />
+              <Text style={styles.userInfoLabel}>Email</Text>
+            </View>
+            <Text style={styles.userInfoValue} numberOfLines={1}>
+              {user?.email || '—'}
+            </Text>
           </View>
+
           <View style={styles.userInfoRow}>
-            <Text style={styles.userInfoLabel}>Phone</Text>
+            <View style={styles.infoLabelGroup}>
+              <Icon
+                name="Phone"
+                size={16}
+                color={Colors.textTertiary}
+                style={{marginRight: 8}}
+              />
+              <Text style={styles.userInfoLabel}>Phone</Text>
+            </View>
             <Text style={styles.userInfoValue}>{user?.phone || '—'}</Text>
           </View>
+
           <View style={[styles.userInfoRow, styles.userInfoRowLast]}>
-            <Text style={styles.userInfoLabel}>Status</Text>
-            <View style={styles.statusContainer}>
-              <View
-                style={[
-                  styles.statusDot,
-                  user?.isVerified
-                    ? styles.statusDotVerified
-                    : styles.statusDotPending,
-                ]}
+            <View style={styles.infoLabelGroup}>
+              <Icon
+                name="Shield"
+                size={16}
+                color={Colors.textTertiary}
+                style={{marginRight: 8}}
               />
-              <Text style={styles.userInfoValue}>
-                {user?.isVerified ? 'Verified' : 'Unverified'}
+              <Text style={styles.userInfoLabel}>Security Status</Text>
+            </View>
+            <View
+              style={[
+                styles.statusBadge,
+                user?.isVerified
+                  ? styles.statusBadgeVerified
+                  : styles.statusBadgePending,
+              ]}>
+              <Icon
+                name={user?.isVerified ? 'CheckCircle2' : 'Clock'}
+                size={12}
+                color={
+                  user?.isVerified ? Colors.successDark : Colors.warningDark
+                }
+                style={{marginRight: 4}}
+              />
+              <Text
+                style={[
+                  styles.statusText,
+                  user?.isVerified
+                    ? styles.statusTextVerified
+                    : styles.statusTextPending,
+                ]}>
+                {user?.isVerified ? 'Verified' : 'Pending'}
               </Text>
             </View>
           </View>
@@ -152,28 +390,58 @@ const HomeScreen: React.FC = () => {
           {quickActions.map(action => (
             <TouchableOpacity
               key={action.id}
-              style={[styles.card, styles.actionCard]}
+              style={[styles.actionCard, Shadows.card]}
               onPress={action.onPress}
-              activeOpacity={0.7}>
-              <Text style={styles.actionEmoji}>{action.emoji}</Text>
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={action.label}>
+              <View
+                style={[
+                  styles.actionIconBox,
+                  {backgroundColor: action.iconBg},
+                ]}>
+                <Icon
+                  name={action.icon}
+                  size={22}
+                  color={action.iconColor}
+                  strokeWidth={2.2}
+                />
+              </View>
               <Text style={styles.actionLabel}>{action.label}</Text>
-              <Text style={styles.actionDescription}>
+              <Text style={styles.actionDescription} numberOfLines={2}>
                 {action.description}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* ─── Future Modules Placeholder ────────────────────────── */}
-        <Text style={styles.sectionTitle}>Modules</Text>
-        <View style={[styles.card, styles.comingSoonCard]}>
-          <Text style={styles.comingSoonEmoji}>🔍</Text>
-          <Text style={styles.comingSoonTitle}>
-            Fraud Detection Modules
-          </Text>
-          <Text style={styles.comingSoonText}>
-            Transaction monitoring, anomaly detection, and reporting modules
-            will be available here in upcoming updates.
+        {/* ─── Detection Modules Section ─────────────────────────── */}
+        <Text style={styles.sectionTitle}>Detection Modules</Text>
+        <View style={[styles.card, styles.modulesCard, Shadows.card]}>
+          <View style={styles.moduleHeader}>
+            <View style={styles.moduleIconBox}>
+              <Icon
+                name="Activity"
+                size={24}
+                color={Colors.primary}
+                strokeWidth={2.5}
+              />
+            </View>
+            <View style={styles.moduleHeaderText}>
+              <View style={styles.moduleBadgeRow}>
+                <Text style={styles.moduleTitle}>AI Fraud Engine</Text>
+                <View style={styles.comingSoonBadge}>
+                  <Text style={styles.comingSoonBadgeText}>Upcoming</Text>
+                </View>
+              </View>
+              <Text style={styles.moduleSubtitle}>
+                Real-time rule & anomaly evaluation
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.moduleDescription}>
+            Transaction monitoring, risk scoring algorithms, and security alerts
+            will be active on this dashboard in the next release.
           </Text>
         </View>
       </ScrollView>
@@ -188,46 +456,127 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.screenHorizontal,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxxl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.xl,
   },
   headerLeft: {
     flex: 1,
   },
   greeting: {
-    ...Typography.styles.body,
-    color: Colors.textSecondary,
+    ...Typography.styles.captionMedium,
+    color: Colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   userName: {
-    ...Typography.styles.heading2,
+    ...Typography.styles.heading1,
     color: Colors.textPrimary,
-    marginTop: Spacing.xxs,
+    marginTop: 2,
   },
 
-  // Cards
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: Spacing.borderRadius.lg,
-    padding: Spacing.cardPadding,
-    ...Shadows.sm,
-    marginBottom: Spacing.lg,
+  // Protection Card
+  protectionCard: {
+    backgroundColor: Colors.white,
+    borderColor: Colors.primaryBorder,
+    borderWidth: 1.5,
   },
-
-  // User Info Card
-  userCard: {
-    marginBottom: Spacing.sectionGap,
+  shieldIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryFaded,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm + 2,
   },
-  userCardHeader: {
+  cardSubtitle: {
+    ...Typography.styles.small,
+    color: Colors.textTertiary,
+    marginTop: 1,
+  },
+  serviceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    paddingVertical: Spacing.sm + 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.borderLight,
+  },
+  serviceRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  serviceInfoGroup: {
+    flex: 1,
+  },
+  serviceLabel: {
+    ...Typography.styles.bodyMedium,
+    color: Colors.textPrimary,
+    marginBottom: 3,
+  },
+  statusPillRow: {
+    flexDirection: 'row',
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Spacing.borderRadius.full,
+  },
+  statusPillActive: {
+    backgroundColor: Colors.successLight,
+    borderWidth: 1,
+    borderColor: Colors.successBorder,
+  },
+  statusPillInactive: {
+    backgroundColor: Colors.warningLight,
+    borderWidth: 1,
+    borderColor: Colors.warningBorder,
+  },
+  statusPillText: {
+    ...Typography.styles.small,
+    fontWeight: Typography.weights.semibold,
+  },
+  statusTextActive: {
+    color: Colors.successDark,
+  },
+  statusTextInactive: {
+    color: Colors.warningDark,
+  },
+  actionBtn: {
+    minWidth: 80,
+    marginLeft: Spacing.md,
+  },
+
+  // General Cards
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.borderRadius.lg,
+    padding: Spacing.cardPadding,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.xl,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  cardHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   cardTitle: {
     ...Typography.styles.bodySemibold,
@@ -235,9 +584,11 @@ const styles = StyleSheet.create({
   },
   roleBadge: {
     backgroundColor: Colors.primaryFaded,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 3,
     borderRadius: Spacing.borderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
   },
   roleBadgeText: {
     ...Typography.styles.small,
@@ -249,97 +600,147 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: Spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.divider,
+    paddingVertical: Spacing.sm + 2,
   },
   userInfoRowLast: {
-    borderBottomWidth: 0,
+    paddingBottom: 0,
   },
-  userInfoLabel: {
-    ...Typography.styles.caption,
-    color: Colors.textTertiary,
-  },
-  userInfoValue: {
-    ...Typography.styles.captionMedium,
-    color: Colors.textPrimary,
-  },
-  statusContainer: {
+  infoLabelGroup: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: Spacing.sm,
+  userInfoLabel: {
+    ...Typography.styles.caption,
+    color: Colors.textSecondary,
   },
-  statusDotVerified: {
-    backgroundColor: Colors.success,
+  userInfoValue: {
+    ...Typography.styles.bodyMedium,
+    color: Colors.textPrimary,
+    maxWidth: '55%',
   },
-  statusDotPending: {
-    backgroundColor: Colors.warning,
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Spacing.borderRadius.full,
+  },
+  statusBadgeVerified: {
+    backgroundColor: Colors.successLight,
+    borderWidth: 1,
+    borderColor: Colors.successBorder,
+  },
+  statusBadgePending: {
+    backgroundColor: Colors.warningLight,
+    borderWidth: 1,
+    borderColor: Colors.warningBorder,
+  },
+  statusText: {
+    ...Typography.styles.small,
+    fontWeight: Typography.weights.semibold,
+  },
+  statusTextVerified: {
+    color: Colors.successDark,
+  },
+  statusTextPending: {
+    color: Colors.warningDark,
   },
 
   // Quick Actions
   sectionTitle: {
     ...Typography.styles.bodySemibold,
     color: Colors.textPrimary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   actionsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: Spacing.md,
-    marginBottom: Spacing.sectionGap,
+    marginBottom: Spacing.xl,
   },
   actionCard: {
     flex: 1,
-    minWidth: '28%',
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.borderRadius.lg,
+    padding: Spacing.md,
     alignItems: 'center',
-    paddingVertical: Spacing.xl,
-    paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  actionEmoji: {
-    fontSize: 28,
+  actionIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: Spacing.sm,
   },
   actionLabel: {
     ...Typography.styles.captionMedium,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: Spacing.xxs,
+    marginBottom: 2,
   },
   actionDescription: {
     ...Typography.styles.small,
     color: Colors.textTertiary,
     textAlign: 'center',
+    fontSize: 10,
+    lineHeight: 13,
   },
 
-  // Coming Soon
-  comingSoonCard: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xxxl,
-    borderStyle: 'dashed',
-    borderWidth: 1,
+  // Modules preview
+  modulesCard: {
+    backgroundColor: Colors.white,
     borderColor: Colors.border,
-    backgroundColor: Colors.surfaceSecondary,
   },
-  comingSoonEmoji: {
-    fontSize: 40,
-    marginBottom: Spacing.lg,
+  moduleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
-  comingSoonTitle: {
+  moduleIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: Colors.primaryFaded,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
+  },
+  moduleHeaderText: {
+    flex: 1,
+  },
+  moduleBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  moduleTitle: {
     ...Typography.styles.bodySemibold,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
+    color: Colors.textPrimary,
   },
-  comingSoonText: {
+  comingSoonBadge: {
+    backgroundColor: Colors.surfaceSecondary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Spacing.borderRadius.full,
+  },
+  comingSoonBadgeText: {
+    ...Typography.styles.small,
+    color: Colors.textTertiary,
+    fontWeight: Typography.weights.medium,
+  },
+  moduleSubtitle: {
     ...Typography.styles.caption,
     color: Colors.textTertiary,
-    textAlign: 'center',
+    marginTop: 1,
+  },
+  moduleDescription: {
+    ...Typography.styles.caption,
+    color: Colors.textSecondary,
     lineHeight: 20,
-    paddingHorizontal: Spacing.lg,
   },
 });
 

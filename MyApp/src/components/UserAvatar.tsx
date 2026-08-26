@@ -1,22 +1,20 @@
 /**
- * User Avatar Component
+ * Modern User Avatar Component
  *
- * Initials-based avatar with deterministic background color from user name.
+ * Initials-based avatar with deterministic vibrant styling and subtle border.
  */
 
 import React from 'react';
 import {View, Text, StyleSheet, ViewStyle} from 'react-native';
-import {Colors, Typography} from '../theme/theme';
+import {Colors, Typography, Shadows} from '../theme/theme';
 
 interface UserAvatarProps {
   name: string;
   size?: number;
   style?: ViewStyle;
+  showRing?: boolean;
 }
 
-/**
- * Deterministically pick a color from the palette based on the name string.
- */
 const getAvatarColor = (name: string): string => {
   const colors = Colors.avatarColors;
   let hash = 0;
@@ -27,25 +25,23 @@ const getAvatarColor = (name: string): string => {
   return colors[index];
 };
 
-/**
- * Extract initials (up to 2 characters) from a name.
- */
 const getInitials = (name: string): string => {
   const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) {
+  if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
-  return name.slice(0, 2).toUpperCase();
+  return (name.slice(0, 2) || '??').toUpperCase();
 };
 
 const UserAvatar: React.FC<UserAvatarProps> = ({
   name,
-  size = 64,
+  size = 56,
   style,
+  showRing = false,
 }) => {
-  const initials = getInitials(name || '??');
+  const initials = getInitials(name || 'User');
   const backgroundColor = getAvatarColor(name || 'User');
-  const fontSize = size * 0.38;
+  const fontSize = Math.round(size * 0.38);
 
   return (
     <View
@@ -57,9 +53,13 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
           borderRadius: size / 2,
           backgroundColor,
         },
+        showRing && styles.ring,
+        Shadows.sm,
         style,
       ]}>
-      <Text style={[styles.initials, {fontSize}]}>{initials}</Text>
+      <Text style={[styles.initials, {fontSize, lineHeight: fontSize + 4}]}>
+        {initials}
+      </Text>
     </View>
   );
 };
@@ -68,10 +68,17 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  ring: {
+    borderColor: Colors.primaryBorder,
+    borderWidth: 2.5,
   },
   initials: {
     color: Colors.textInverse,
     fontWeight: Typography.weights.semibold,
+    letterSpacing: 0.5,
   },
 });
 

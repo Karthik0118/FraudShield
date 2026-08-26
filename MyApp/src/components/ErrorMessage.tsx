@@ -1,13 +1,13 @@
 /**
- * Error Message Component
+ * Modern Error Banner Component
  *
- * Inline error banner with optional retry action.
- * Handles both single-message and validation-array errors.
+ * Polished alert banner with Lucide AlertCircle icon, optional retry/dismiss actions.
  */
 
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {Colors, Typography, Spacing} from '../theme/theme';
+import Icon from './Icon';
 
 interface ErrorMessageProps {
   message: string;
@@ -26,22 +26,33 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.icon}>⚠️</Text>
+      <View style={styles.headerRow}>
+        <View style={styles.iconContainer}>
+          <Icon name="AlertCircle" size={18} color={Colors.error} />
+        </View>
         <Text style={styles.message}>{message}</Text>
-      </View>
-      <View style={styles.actions}>
-        {onRetry && (
-          <TouchableOpacity onPress={onRetry} style={styles.actionButton}>
-            <Text style={styles.retryText}>Retry</Text>
-          </TouchableOpacity>
-        )}
         {onDismiss && (
-          <TouchableOpacity onPress={onDismiss} style={styles.actionButton}>
-            <Text style={styles.dismissText}>Dismiss</Text>
+          <TouchableOpacity
+            onPress={onDismiss}
+            style={styles.dismissButton}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            accessibilityRole="button"
+            accessibilityLabel="Dismiss error">
+            <Icon name="X" size={16} color={Colors.errorDark} />
           </TouchableOpacity>
         )}
       </View>
+      {onRetry && (
+        <View style={styles.actions}>
+          <TouchableOpacity
+            onPress={onRetry}
+            style={styles.retryButton}
+            accessibilityRole="button"
+            accessibilityLabel="Retry action">
+            <Text style={styles.retryText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -50,41 +61,48 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.errorLight,
     borderRadius: Spacing.borderRadius.md,
-    padding: Spacing.lg,
+    padding: Spacing.md + 2,
     marginBottom: Spacing.lg,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.error,
+    borderWidth: 1,
+    borderColor: Colors.errorBorder,
   },
-  content: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  icon: {
-    fontSize: 16,
-    marginRight: Spacing.sm,
-    marginTop: 2,
+  iconContainer: {
+    marginRight: Spacing.sm + 2,
+    marginTop: 1,
   },
   message: {
     ...Typography.styles.caption,
-    color: Colors.error,
+    color: Colors.errorDark,
+    fontWeight: Typography.weights.medium,
     flex: 1,
+    lineHeight: 19,
+  },
+  dismissButton: {
+    marginLeft: Spacing.sm,
+    padding: 2,
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: Spacing.sm,
+    paddingTop: Spacing.xs,
   },
-  actionButton: {
-    paddingVertical: Spacing.xs,
+  retryButton: {
+    backgroundColor: Colors.white,
+    paddingVertical: 6,
     paddingHorizontal: Spacing.md,
+    borderRadius: Spacing.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.errorBorder,
   },
   retryText: {
-    ...Typography.styles.captionMedium,
+    ...Typography.styles.small,
+    fontWeight: Typography.weights.semibold,
     color: Colors.error,
-  },
-  dismissText: {
-    ...Typography.styles.captionMedium,
-    color: Colors.textTertiary,
   },
 });
 

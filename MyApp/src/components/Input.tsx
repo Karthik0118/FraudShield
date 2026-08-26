@@ -1,8 +1,8 @@
 /**
- * Reusable Input Component
+ * Modern Input Component
  *
- * Styled TextInput with label, error, password toggle, focus animation,
- * disabled state, and keyboard type support.
+ * Styled TextInput with Lucide left icons, password reveal toggle (Eye / EyeOff),
+ * animated focus states, accessible validation error states, and clear typography.
  */
 
 import React, {useState, useRef} from 'react';
@@ -17,14 +17,16 @@ import {
   ViewStyle,
 } from 'react-native';
 import {Colors, Typography, Spacing} from '../theme/theme';
+import Icon, {IconName} from './Icon';
 
-interface InputProps extends Omit<TextInputProps, 'style'> {
+export interface InputProps extends Omit<TextInputProps, 'style'> {
   label: string;
   error?: string;
   isPassword?: boolean;
   disabled?: boolean;
   containerStyle?: ViewStyle;
-  leftIcon?: React.ReactNode;
+  leftIcon?: IconName | React.ReactNode;
+  hint?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -34,28 +36,31 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   containerStyle,
   leftIcon,
+  hint,
   ...textInputProps
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const borderAnimation = useRef(new Animated.Value(0)).current;
 
-  const handleFocus = () => {
+  const handleFocus = (e: any) => {
     setIsFocused(true);
     Animated.timing(borderAnimation, {
       toValue: 1,
-      duration: 200,
+      duration: 180,
       useNativeDriver: false,
     }).start();
+    textInputProps.onFocus?.(e);
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: any) => {
     setIsFocused(false);
     Animated.timing(borderAnimation, {
       toValue: 0,
-      duration: 200,
+      duration: 180,
       useNativeDriver: false,
     }).start();
+    textInputProps.onBlur?.(e);
   };
 
   const borderColor = error
@@ -65,20 +70,49 @@ const Input: React.FC<InputProps> = ({
         outputRange: [Colors.border, Colors.primary],
       });
 
+  const backgroundColor = disabled
+    ? Colors.disabledBackground
+    : isFocused
+    ? Colors.white
+    : Colors.surface;
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={[styles.label, error && styles.labelError]}>
-        {label}
-      </Text>
+      <View style={styles.labelRow}>
+        <Text style={[styles.label, error && styles.labelError]}>
+          {label}
+        </Text>
+        {hint && !error ? <Text style={styles.hint}>{hint}</Text> : null}
+      </View>
+
       <Animated.View
         style={[
           styles.inputContainer,
-          {borderColor},
+          {borderColor, backgroundColor},
           isFocused && styles.inputContainerFocused,
           disabled && styles.inputContainerDisabled,
           error && styles.inputContainerError,
         ]}>
-        {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+        {leftIcon && (
+          <View style={styles.leftIconContainer}>
+            {typeof leftIcon === 'string' ? (
+              <Icon
+                name={leftIcon as IconName}
+                size={18}
+                color={
+                  error
+                    ? Colors.error
+                    : isFocused
+                    ? Colors.primary
+                    : Colors.textTertiary
+                }
+              />
+            ) : (
+              leftIcon
+            )}
+          </View>
+        )}
+
         <TextInput
           style={[
             styles.input,
@@ -90,21 +124,31 @@ const Input: React.FC<InputProps> = ({
           secureTextEntry={isPassword && !isPasswordVisible}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          accessibilityLabel={label}
           {...textInputProps}
         />
+
         {isPassword && (
           <TouchableOpacity
             style={styles.toggleButton}
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-            <Text style={styles.toggleText}>
-              {isPasswordVisible ? 'Hide' : 'Show'}
-            </Text>
+            hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}
+            accessibilityRole="button"
+            accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}>
+            <Icon
+              name={isPasswordVisible ? 'EyeOff' : 'Eye'}
+              size={20}
+              color={Colors.textTertiary}
+            />
           </TouchableOpacity>
         )}
       </Animated.View>
+
       {error ? (
-        <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.errorRow}>
+          <Icon name="AlertCircle" size={13} color={Colors.error} style={{marginRight: 4}} />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
       ) : null}
     </View>
   );
@@ -114,27 +158,41 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.lg,
   },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs + 2,
+  },
   label: {
     ...Typography.styles.label,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
+    color: Colors.textPrimary,
+    fontWeight: Typography.weights.medium,
   },
   labelError: {
     color: Colors.error,
+  },
+  hint: {
+    ...Typography.styles.small,
+    color: Colors.textTertiary,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
     borderRadius: Spacing.borderRadius.md,
-    backgroundColor: Colors.surface,
+    height: Spacing.inputHeight,
+    paddingHorizontal: Spacing.inputHorizontal,
   },
   inputContainerFocused: {
     backgroundColor: Colors.white,
+    shadowColor: Colors.primary,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   inputContainerDisabled: {
-    backgroundColor: Colors.surfaceSecondary,
     borderColor: Colors.borderLight,
   },
   inputContainerError: {
@@ -143,10 +201,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: Spacing.inputVertical,
-    paddingHorizontal: Spacing.inputHorizontal,
+    height: '100%',
     ...Typography.styles.body,
     color: Colors.textPrimary,
+    paddingVertical: 0,
   },
   inputWithIcon: {
     paddingLeft: Spacing.sm,
@@ -154,21 +212,25 @@ const styles = StyleSheet.create({
   inputDisabled: {
     color: Colors.textTertiary,
   },
-  leftIcon: {
-    paddingLeft: Spacing.inputHorizontal,
+  leftIconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.xs,
   },
   toggleButton: {
-    paddingHorizontal: Spacing.inputHorizontal,
-    paddingVertical: Spacing.inputVertical,
+    padding: Spacing.xs,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  toggleText: {
-    ...Typography.styles.captionMedium,
-    color: Colors.primary,
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.xs + 1,
   },
   errorText: {
     ...Typography.styles.caption,
     color: Colors.error,
-    marginTop: Spacing.xs,
+    fontWeight: Typography.weights.medium,
   },
 });
 

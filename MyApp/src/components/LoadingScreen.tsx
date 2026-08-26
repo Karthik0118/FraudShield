@@ -1,29 +1,56 @@
 /**
- * Loading Screen Component
+ * Modern Loading / Splash Screen Component
  *
- * Full-screen loading indicator with app branding.
- * Used during the initial authentication state check.
+ * Polished centered branding with Lucide Shield icon, spinner, and clean typography.
  */
 
-import React from 'react';
-import {View, Text, ActivityIndicator, StyleSheet} from 'react-native';
-import {Colors, Typography, Spacing} from '../theme/theme';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, ActivityIndicator, StyleSheet, Animated} from 'react-native';
+import {Colors, Typography, Spacing, Shadows} from '../theme/theme';
+import Icon from './Icon';
 
 const LoadingScreen: React.FC = () => {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.06,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
+
   return (
     <View style={styles.container}>
       <View style={styles.brandContainer}>
-        <View style={styles.iconCircle}>
-          <Text style={styles.iconText}>🛡️</Text>
-        </View>
+        <Animated.View
+          style={[
+            styles.iconCircle,
+            Shadows.md,
+            {transform: [{scale: pulseAnim}]},
+          ]}>
+          <Icon name="Shield" size={40} color={Colors.primary} strokeWidth={2.5} />
+        </Animated.View>
         <Text style={styles.appName}>FraudShield</Text>
+        <Text style={styles.appTagline}>Smart Security Platform</Text>
       </View>
       <ActivityIndicator
-        size="large"
+        size="small"
         color={Colors.primary}
         style={styles.spinner}
       />
-      <Text style={styles.loadingText}>Loading...</Text>
+      <Text style={styles.loadingText}>Securing session...</Text>
     </View>
   );
 };
@@ -37,30 +64,36 @@ const styles = StyleSheet.create({
   },
   brandContainer: {
     alignItems: 'center',
-    marginBottom: Spacing.xxxxl,
+    marginBottom: Spacing.xxxl,
   },
   iconCircle: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primaryFaded,
+    borderRadius: 24,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
-  iconText: {
-    fontSize: 36,
-  },
   appName: {
-    ...Typography.styles.heading2,
+    ...Typography.styles.heading1,
     color: Colors.textPrimary,
+    letterSpacing: -0.5,
+  },
+  appTagline: {
+    ...Typography.styles.caption,
+    color: Colors.textTertiary,
+    marginTop: Spacing.xxs,
   },
   spinner: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   loadingText: {
     ...Typography.styles.caption,
-    color: Colors.textTertiary,
+    color: Colors.textSecondary,
+    fontWeight: Typography.weights.medium,
   },
 });
 

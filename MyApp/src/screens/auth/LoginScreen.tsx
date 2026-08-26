@@ -1,8 +1,8 @@
 /**
- * Login Screen
+ * Modern Login Screen
  *
- * Modern, clean login with email/password, validation, loading state,
- * error handling, and register navigation.
+ * Polished layout with Lucide Shield branding, Mail/Lock input icons,
+ * inline validation, error handling, and register link.
  */
 
 import React, {useState} from 'react';
@@ -21,7 +21,8 @@ import {useAuth} from '../../context/AuthContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import ErrorMessage from '../../components/ErrorMessage';
-import {Colors, Typography, Spacing} from '../../theme/theme';
+import Icon from '../../components/Icon';
+import {Colors, Typography, Spacing, Shadows} from '../../theme/theme';
 import {validateEmail} from '../../utils/validation';
 import {extractApiError} from '../../utils/errorHandler';
 
@@ -71,7 +72,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      // Navigation happens automatically via RootNavigator
     } catch (err: any) {
       const apiError = extractApiError(err);
       setError(apiError.message);
@@ -91,21 +91,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
         showsVerticalScrollIndicator={false}>
         {/* ─── Branding ─────────────────────────────────────────── */}
         <View style={styles.brandSection}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoEmoji}>🛡️</Text>
+          <View style={[styles.logoCircle, Shadows.sm]}>
+            <Icon name="Shield" size={36} color={Colors.primary} strokeWidth={2.5} />
           </View>
           <Text style={styles.appName}>FraudShield</Text>
           <Text style={styles.subtitle}>
-            Secure fraud detection at your fingertips
+            Secure fraud detection & transaction monitoring
           </Text>
         </View>
 
-        {/* ─── Welcome ──────────────────────────────────────────── */}
-        <View style={styles.formSection}>
-          <Text style={styles.heading}>Welcome back</Text>
-          <Text style={styles.subheading}>
-            Sign in to your account to continue
-          </Text>
+        {/* ─── Form Card ────────────────────────────────────────── */}
+        <View style={[styles.card, Shadows.card]}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.heading}>Welcome back</Text>
+            <Text style={styles.subheading}>
+              Sign in to your account to continue
+            </Text>
+          </View>
 
           {/* ─── Error Banner ──────────────────────────────────── */}
           {error ? (
@@ -115,10 +117,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
             />
           ) : null}
 
-          {/* ─── Form ──────────────────────────────────────────── */}
+          {/* ─── Form Inputs ───────────────────────────────────── */}
           <Input
-            label="Email"
-            placeholder="Enter your email"
+            label="Email Address"
+            placeholder="you@example.com"
             value={email}
             onChangeText={text => {
               setEmail(text);
@@ -127,6 +129,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
               }
             }}
             error={fieldErrors.email}
+            leftIcon="Mail"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -144,6 +147,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
               }
             }}
             error={fieldErrors.password}
+            leftIcon="Lock"
             isPassword
             returnKeyType="done"
             onSubmitEditing={handleLogin}
@@ -154,18 +158,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
             title="Sign In"
             onPress={handleLogin}
             loading={loading}
+            rightIcon="ArrowRight"
             style={styles.loginButton}
           />
+        </View>
 
-          {/* ─── Register Link ─────────────────────────────────── */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Register')}
-              disabled={loading}>
-              <Text style={styles.linkText}>Create Account</Text>
-            </TouchableOpacity>
-          </View>
+        {/* ─── Register Link ─────────────────────────────────── */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Don't have an account? </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Register')}
+            disabled={loading}
+            hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+            <Text style={styles.linkText}>Create Account</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -180,51 +186,58 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.screenHorizontal,
-    paddingTop: Spacing.mega,
+    paddingTop: Spacing.xxxl,
     paddingBottom: Spacing.xxxl,
+    justifyContent: 'center',
   },
   brandSection: {
     alignItems: 'center',
-    marginBottom: Spacing.xxxxl,
+    marginBottom: Spacing.xxl,
   },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primaryFaded,
+    width: 68,
+    height: 68,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.md,
   },
-  logoEmoji: {
-    fontSize: 32,
-  },
   appName: {
-    ...Typography.styles.heading2,
-    color: Colors.primary,
-    marginBottom: Spacing.xs,
+    ...Typography.styles.heading1,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xxs,
   },
   subtitle: {
     ...Typography.styles.caption,
     color: Colors.textTertiary,
     textAlign: 'center',
+    maxWidth: 260,
   },
-  formSection: {
-    flex: 1,
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: Spacing.borderRadius.xl,
+    padding: Spacing.cardPadding,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.xxl,
+  },
+  cardHeader: {
+    marginBottom: Spacing.lg,
   },
   heading: {
-    ...Typography.styles.heading1,
+    ...Typography.styles.heading2,
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.xxs,
   },
   subheading: {
     ...Typography.styles.body,
     color: Colors.textSecondary,
-    marginBottom: Spacing.xxl,
   },
   loginButton: {
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.xxl,
+    marginTop: Spacing.xs,
   },
   footer: {
     flexDirection: 'row',

@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">MyApp</string>
+    <string name="app_name">FraudShield</string>
+    <string name="accessibility_service_description">Monitors visible on-screen links in real-time to alert you of detected URLs.</string>
 </resources>
