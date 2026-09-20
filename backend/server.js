@@ -26,6 +26,12 @@ app.use(cors());                         // Enable CORS for Android client
 app.use(express.json());                 // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging for development diagnostics
+app.use((req, res, next) => {
+  console.log(`[HTTP] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // ---------------------------------------------------------------------------
 // Health-check route
 // ---------------------------------------------------------------------------
