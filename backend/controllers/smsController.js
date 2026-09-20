@@ -51,29 +51,37 @@ const detect = async (req, res, next) => {
 
     const mlResponse = await callMLService(`${ML_API_URL}/predict`, payload);
 
+    // ── Map ML response to frontend contract ─────────────────────────────────
+    // Python returns: "FRAUD" | "NOT_FRAUD"
+    // Frontend expects: "Fraudulent" | "Legitimate"
+    const isFraud = mlResponse.prediction === "FRAUD";
+    const mappedPrediction = isFraud ? "Fraudulent" : "Legitimate";
+
     // ── Return to Client ──────────────────────────────────────────────────────
+    console.log(`[SMS] Analyzed SMS: prediction=${mappedPrediction}, probability=${mlResponse.fraud_probability}`);
     return res.status(200).json({
       success: true,
       message: "SMS analyzed successfully.",
       data: {
-        prediction:        mlResponse.prediction,         // "Legitimate" | "Fraudulent"
+        prediction:        mappedPrediction,            // "Fraudulent" | "Legitimate"
         fraud_probability: mlResponse.fraud_probability,  // 0.0 – 1.0
         confidence:        mlResponse.confidence,         // max class probability
-        label_id:          mlResponse.label_id,           // 0 | 1
+        label_id:          isFraud ? 1 : 0,              // 1=fraudulent, 0=legitimate
       },
     });
 
   } catch (error) {
-    // ML service is down or unreachable
-    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+    console.error("[SMS] Error during detection:", error.message || error);
+    // ML service is down or unreachable or timed out
+    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND" || error.code === "ETIMEDOUT") {
       return res.status(503).json({
         success: false,
-        message: "The fraud detection service is currently unavailable. Please try again later.",
+        message: "Fraud detection service is unavailable.",
         error_code: "ML_SERVICE_UNAVAILABLE",
       });
     }
 
-    // ML service returned an error response
+    // ML service returned an error response (e.g. 400, 422, 500)
     if (error.statusCode) {
       return res.status(error.statusCode).json({
         success: false,

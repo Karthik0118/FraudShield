@@ -115,9 +115,11 @@ const SmsDetectionScreen: React.FC = () => {
     setError(null);
   }, []);
 
-  const isFraud    = result?.prediction === 'Fraudulent';
-  const probPercent = result ? Math.round(result.fraud_probability * 100) : 0;
-  const confPercent = result ? Math.round(result.confidence * 100) : 0;
+  const isFraud =
+    result?.prediction?.toLowerCase() === 'fraudulent' ||
+    result?.prediction?.toUpperCase() === 'FRAUD';
+  const probPercent = result ? Math.round((result.fraud_probability ?? 0) * 100) : 0;
+  const confPercent = result ? Math.round((result.confidence ?? 0) * 100) : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -361,7 +363,7 @@ const SmsDetectionScreen: React.FC = () => {
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Score</Text>
                   <Text style={styles.detailValue}>
-                    {result.fraud_probability.toFixed(3)}
+                    {(result.fraud_probability ?? 0).toFixed(3)}
                   </Text>
                 </View>
               </View>

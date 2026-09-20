@@ -8,8 +8,10 @@
  */
 
 const Config = {
-  // Backend API base URL — change this to match your environment
-  API_BASE_URL: 'http://localhost:5000',
+  // Backend API base URL — Android emulator must use 10.0.2.2 (maps to host machine's localhost)
+  // Physical device: use your PC's LAN IP e.g. http://192.168.1.x:5000
+  // Production: https://your-production-api.com
+  API_BASE_URL: 'http://127.0.0.1:5000',
 
 
   // App metadata
@@ -23,8 +25,8 @@ const Config = {
     USER_DATA: '@auth_user_data',
   },
 
-  // Request timeout in milliseconds
-  REQUEST_TIMEOUT: 15000,
+  // Request timeout in milliseconds (30s to allow ML inference time)
+  REQUEST_TIMEOUT: 30000,
 };
 
 export default Config;

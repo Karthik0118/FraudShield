@@ -17,11 +17,22 @@ const smsApi = {
    * Requires authentication (Bearer token added automatically by apiClient).
    */
   detect: async (data: SmsDetectRequest): Promise<SmsDetectResponse> => {
-    const response = await apiClient.post<SmsDetectResponse>(
-      `${SMS_BASE}/detect`,
-      data,
-    );
-    return response.data;
+    console.log('[SMS] Detect request started');
+    console.log(`[SMS] API URL: ${SMS_BASE}/detect`);
+    try {
+      console.log('[SMS] Request sent');
+      const response = await apiClient.post<SmsDetectResponse>(
+        `${SMS_BASE}/detect`,
+        data,
+      );
+      console.log(`[SMS] Response status: ${response.status}`);
+      console.log('[SMS] Detection successful');
+      return response.data;
+    } catch (error: any) {
+      console.log(`[SMS] Error status: ${error?.response?.status ?? 'No response'}`);
+      console.log(`[SMS] Error message: ${error?.response?.data?.message || error?.message || 'Unknown error'}`);
+      throw error;
+    }
   },
 };
 

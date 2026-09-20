@@ -13,6 +13,11 @@ import {User} from '../types/auth';
 
 const {STORAGE_KEYS} = Config;
 
+// In-memory cache to guarantee fast, synchronous-like fallback within active session
+let memoryAccessToken: string | null = null;
+let memoryRefreshToken: string | null = null;
+let memoryUser: User | null = null;
+
 export const authStorage = {
   // ─── Tokens ──────────────────────────────────────────────────────────────
 
@@ -20,50 +25,73 @@ export const authStorage = {
     accessToken: string,
     refreshToken: string,
   ): Promise<void> => {
+    memoryAccessToken = accessToken;
+    memoryRefreshToken = refreshToken;
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
       await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     } catch (e) {
-      console.warn('Failed to save tokens:', e);
+      console.warn('Failed to save tokens to AsyncStorage (kept in memory):', e);
     }
   },
 
   getAccessToken: async (): Promise<string | null> => {
+    if (memoryAccessToken) {
+      return memoryAccessToken;
+    }
     try {
-      return await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+      const token = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+      if (token) {
+        memoryAccessToken = token;
+      }
+      return token;
     } catch (e) {
-      console.warn('Failed to get access token:', e);
-      return null;
+      console.warn('Failed to get access token from AsyncStorage:', e);
+      return memoryAccessToken;
     }
   },
 
   getRefreshToken: async (): Promise<string | null> => {
+    if (memoryRefreshToken) {
+      return memoryRefreshToken;
+    }
     try {
-      return await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      const token = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      if (token) {
+        memoryRefreshToken = token;
+      }
+      return token;
     } catch (e) {
-      console.warn('Failed to get refresh token:', e);
-      return null;
+      console.warn('Failed to get refresh token from AsyncStorage:', e);
+      return memoryRefreshToken;
     }
   },
 
   // ─── User Data ───────────────────────────────────────────────────────────
 
   saveUser: async (user: User): Promise<void> => {
+    memoryUser = user;
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
     } catch (e) {
-      console.warn('Failed to save user:', e);
+      console.warn('Failed to save user to AsyncStorage (kept in memory):', e);
     }
   },
 
   getUser: async (): Promise<User | null> => {
+    if (memoryUser) {
+      return memoryUser;
+    }
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (data) {
-        return JSON.parse(data) as User;
+        const parsed = JSON.parse(data) as User;
+        memoryUser = parsed;
+        return parsed;
       }
     } catch (e) {
-      console.warn('Failed to get user:', e);
+      console.warn('Failed to get user from AsyncStorage:', e);
+      return memoryUser;
     }
     return null;
   },
@@ -71,12 +99,15 @@ export const authStorage = {
   // ─── Clear ───────────────────────────────────────────────────────────────
 
   clearAll: async (): Promise<void> => {
+    memoryAccessToken = null;
+    memoryRefreshToken = null;
+    memoryUser = null;
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
       await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
       await AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA);
     } catch (e) {
-      console.warn('Failed to clear storage:', e);
+      console.warn('Failed to clear AsyncStorage:', e);
     }
   },
 };

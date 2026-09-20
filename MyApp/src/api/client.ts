@@ -138,12 +138,20 @@ apiClient.interceptors.response.use(
 
       return apiClient(originalRequest);
     } catch (refreshError) {
-      // Refresh failed — clear everything and redirect to login
-      processQueue(refreshError as Error, null);
-      await authStorage.clearAll();
+      // Only clear auth state for genuine authentication failures (401/403 from server).
+      // Transient network errors during refresh should NOT log the user out.
+      const isAuthError =
+        (refreshError as any)?.response?.status === 401 ||
+        (refreshError as any)?.response?.status === 403 ||
+        (refreshError as Error)?.message === 'No refresh token available';
 
-      if (onAuthFailure) {
-        onAuthFailure();
+      processQueue(refreshError as Error, null);
+
+      if (isAuthError) {
+        await authStorage.clearAll();
+        if (onAuthFailure) {
+          onAuthFailure();
+        }
       }
 
       return Promise.reject(refreshError);
