@@ -42,6 +42,7 @@ app.get("/", (req, res) => {
 // API routes
 // ---------------------------------------------------------------------------
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/sms",  require("./routes/smsRoutes"));
 
 // ---------------------------------------------------------------------------
 // 404 handler — catch unmatched routes

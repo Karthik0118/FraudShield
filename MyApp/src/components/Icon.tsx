@@ -35,7 +35,9 @@ export type IconName =
   | 'Edit3'
   | 'Info'
   | 'X'
-  | 'ArrowRight';
+  | 'ArrowRight'
+  | 'ScanLine'
+  | 'MessageSquare';
 
 export interface IconProps {
   name: IconName;
@@ -966,6 +968,108 @@ export const Icon: React.FC<IconProps> = ({
                 borderRightWidth: strokeWidth,
                 borderColor: color,
                 transform: [{rotate: '45deg'}],
+              }}
+            />
+          </View>
+        );
+
+      case 'ScanLine':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Horizontal scan line */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 11,
+                left: 3,
+                right: 3,
+                height: strokeWidth,
+                backgroundColor: color,
+              }}
+            />
+            {/* Top-left corner */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                left: 3,
+                width: 6,
+                height: 6,
+                borderTopWidth: strokeWidth,
+                borderLeftWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Top-right corner */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                right: 3,
+                width: 6,
+                height: 6,
+                borderTopWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Bottom-left corner */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 3,
+                left: 3,
+                width: 6,
+                height: 6,
+                borderBottomWidth: strokeWidth,
+                borderLeftWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Bottom-right corner */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 3,
+                right: 3,
+                width: 6,
+                height: 6,
+                borderBottomWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+          </View>
+        );
+
+      case 'MessageSquare':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Bubble body */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                left: 3,
+                width: 18,
+                height: 14,
+                borderRadius: 3,
+                borderWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Tail */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 3,
+                left: 6,
+                width: 5,
+                height: 5,
+                borderLeftWidth: strokeWidth,
+                borderBottomWidth: strokeWidth,
+                borderColor: color,
+                transform: [{rotate: '0deg'}],
               }}
             />
           </View>

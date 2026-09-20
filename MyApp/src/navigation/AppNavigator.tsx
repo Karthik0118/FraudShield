@@ -14,6 +14,7 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
+import SmsDetectionScreen from '../screens/sms/SmsDetectionScreen';
 import {Colors, Typography, Spacing, Shadows} from '../theme/theme';
 import Icon, {IconName} from '../components/Icon';
 
@@ -29,6 +30,10 @@ export type ProfileStackParamList = {
 export type SettingsStackParamList = {
   SettingsMain: undefined;
   ChangePassword: undefined;
+};
+
+export type SmsStackParamList = {
+  SmsDetectionMain: undefined;
 };
 
 // ─── Tab Icon Component ─────────────────────────────────────────────────────
@@ -113,6 +118,16 @@ const SettingsStackScreen: React.FC = () => (
   </SettingsStack.Navigator>
 );
 
+// ─── SMS Stack ───────────────────────────────────────────────────────────────
+
+const SmsStack = createNativeStackNavigator<SmsStackParamList>();
+
+const SmsStackScreen: React.FC = () => (
+  <SmsStack.Navigator screenOptions={{headerShown: false, ...stackScreenOptions}}>
+    <SmsStack.Screen name="SmsDetectionMain" component={SmsDetectionScreen} />
+  </SmsStack.Navigator>
+);
+
 // ─── Bottom Tab Navigator ───────────────────────────────────────────────────
 
 const Tab = createBottomTabNavigator();
@@ -135,6 +150,16 @@ const AppNavigator: React.FC = () => {
           tabBarLabel: 'Home',
           tabBarIcon: ({focused}) => (
             <TabBarIcon name="Home" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Detect"
+        component={SmsStackScreen}
+        options={{
+          tabBarLabel: 'Detect',
+          tabBarIcon: ({focused}) => (
+            <TabBarIcon name="ScanLine" focused={focused} />
           ),
         }}
       />
