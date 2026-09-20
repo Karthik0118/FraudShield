@@ -1,0 +1,18 @@
+
+=== cybersectony/phishing-email-detection-distilbert_v2.4.1 ===
+[{'label': 'LABEL_1', 'score': 0.9999872446060181}, {'label': 'LABEL_0', 'score': 1.2690926268987823e-05}, {'label': 'LABEL_3', 'score': 1.4428768224661326e-07}, {'label': 'LABEL_2', 'score': 4.4926370179609876e-08}] | Congratulations! You have won Rs. 50,000. Click this link to claim your prize.
+[{'label': 'LABEL_1', 'score': 0.9999860525131226}, {'label': 'LABEL_0', 'score': 1.3783778740616981e-05}, {'label': 'LABEL_3', 'score': 1.4845370799321245e-07}, {'label': 'LABEL_2', 'score': 4.5867224685025576e-08}] | Congratulations! You have won INR 50,000. Click this link immediately to claim your reward.
+[{'label': 'LABEL_1', 'score': 0.9999748468399048}, {'label': 'LABEL_0', 'score': 2.5182611352647655e-05}, {'label': 'LABEL_3', 'score': 2.237293017515185e-08}, {'label': 'LABEL_2', 'score': 8.139836360498975e-09}] | Your bank account will be blocked today. Verify your KYC immediately using this link.
+[{'label': 'LABEL_1', 'score': 0.9999796152114868}, {'label': 'LABEL_0', 'score': 2.0387025870149955e-05}, {'label': 'LABEL_3', 'score': 5.400344349482111e-08}, {'label': 'LABEL_2', 'score': 1.8713922855795317e-08}] | You have received a cashback of Rs. 10,000. Claim it now.
+[{'label': 'LABEL_0', 'score': 0.9999614953994751}, {'label': 'LABEL_1', 'score': 3.8305268390104175e-05}, {'label': 'LABEL_3', 'score': 2.92918713284962e-07}, {'label': 'LABEL_2', 'score': 4.747311166397594e-08}] | Hi, I'll be home around 7 PM.
+[{'label': 'LABEL_0', 'score': 0.9999368190765381}, {'label': 'LABEL_1', 'score': 6.261288217501715e-05}, {'label': 'LABEL_3', 'score': 5.089211185804743e-07}, {'label': 'LABEL_2', 'score': 9.658818811431047e-08}] | Your appointment is confirmed for tomorrow at 10 AM.
+[{'label': 'LABEL_0', 'score': 0.9999830722808838}, {'label': 'LABEL_1', 'score': 1.6646938092890196e-05}, {'label': 'LABEL_3', 'score': 2.3900577161839465e-07}, {'label': 'LABEL_2', 'score': 2.6893145488315895e-08}] | Can you send me the project report when you get time?
+
+=== ealvaradob/bert-finetuned-phishing ===
+[{'label': 'phishing', 'score': 0.9999943971633911}, {'label': 'benign', 'score': 5.567597781919176e-06}] | Congratulations! You have won Rs. 50,000. Click this link to claim your prize.
+[{'label': 'phishing', 'score': 0.9999939203262329}, {'label': 'benign', 'score': 6.06929916102672e-06}] | Congratulations! You have won INR 50,000. Click this link immediately to claim your reward.
+[{'label': 'benign', 'score': 0.9674683213233948}, {'label': 'phishing', 'score': 0.03253175690770149}] | Your bank account will be blocked today. Verify your KYC immediately using this link.
+[{'label': 'benign', 'score': 0.8158996105194092}, {'label': 'phishing', 'score': 0.18410038948059082}] | You have received a cashback of Rs. 10,000. Claim it now.
+[{'label': 'benign', 'score': 0.9999936819076538}, {'label': 'phishing', 'score': 6.3772658904781565e-06}] | Hi, I'll be home around 7 PM.
+[{'label': 'benign', 'score': 0.9999641180038452}, {'label': 'phishing', 'score': 3.5890141589334235e-05}] | Your appointment is confirmed for tomorrow at 10 AM.
+[{'label': 'benign', 'score': 0.9999943971633911}, {'label': 'phishing', 'score': 5.583570782619063e-06}] | Can you send me the project report when you get time?
