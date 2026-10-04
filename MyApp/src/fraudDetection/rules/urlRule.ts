@@ -31,7 +31,7 @@ export const urlRule = (text: string): RuleResult => {
   return {
     rule: 'SUSPICIOUS_URL',
     triggered: isSuspicious,
-    score: isSuspicious ? 30 : 0,
+    score: isSuspicious ? 20 : 0,
     reason: isSuspicious ? 'Message contains a suspicious URL pattern' : undefined,
   };
 };

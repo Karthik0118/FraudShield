@@ -105,35 +105,37 @@ const HomeScreen: React.FC = () => {
 
   const quickActions: QuickAction[] = [
     {
-      id: 'profile',
-      icon: 'User',
+      id: 'sms',
+      icon: 'MessageSquare',
       iconBg: Colors.primaryFaded,
       iconColor: Colors.primary,
-      label: 'My Profile',
-      description: 'Account details & info',
+      label: 'Scan SMS',
+      description: 'Analyse messages',
       onPress: () => {
-        navigation.dispatch(CommonActions.navigate({name: 'Profile'}));
+        navigation.dispatch(CommonActions.navigate({name: 'Detect'}));
       },
     },
     {
-      id: 'settings',
-      icon: 'Settings',
+      id: 'url',
+      icon: 'Link',
       iconBg: '#F3E8FF',
       iconColor: '#7C3AED',
-      label: 'Settings',
-      description: 'Security & password',
+      label: 'Check URL',
+      description: 'Analyse links',
       onPress: () => {
-        navigation.dispatch(CommonActions.navigate({name: 'Settings'}));
+        navigation.dispatch(CommonActions.navigate({name: 'Detect'}));
       },
     },
     {
-      id: 'logout',
-      icon: 'LogOut',
-      iconBg: Colors.errorLight,
-      iconColor: Colors.error,
-      label: 'Sign Out',
-      description: 'End active session',
-      onPress: handleLogout,
+      id: 'history',
+      icon: 'Clock',
+      iconBg: '#E0F2FE',
+      iconColor: '#0284C7',
+      label: 'History',
+      description: 'View past scans',
+      onPress: () => {
+        navigation.dispatch(CommonActions.navigate({name: 'History'}));
+      },
     },
   ];
 
@@ -415,34 +417,30 @@ const HomeScreen: React.FC = () => {
           ))}
         </View>
 
-        {/* ─── Detection Modules Section ─────────────────────────── */}
-        <Text style={styles.sectionTitle}>Detection Modules</Text>
-        <View style={[styles.card, styles.modulesCard, Shadows.card]}>
-          <View style={styles.moduleHeader}>
-            <View style={styles.moduleIconBox}>
-              <Icon
-                name="Activity"
-                size={24}
-                color={Colors.primary}
-                strokeWidth={2.5}
-              />
+        {/* ─── Security Statistics Section ─────────────────────────── */}
+        <Text style={styles.sectionTitle}>Security Statistics</Text>
+        <View style={styles.actionsGrid}>
+          <View style={[styles.actionCard, Shadows.card]}>
+            <View style={[styles.actionIconBox, {backgroundColor: Colors.primaryFaded}]}>
+              <Icon name="MessageSquare" size={20} color={Colors.primary} />
             </View>
-            <View style={styles.moduleHeaderText}>
-              <View style={styles.moduleBadgeRow}>
-                <Text style={styles.moduleTitle}>AI Fraud Engine</Text>
-                <View style={styles.comingSoonBadge}>
-                  <Text style={styles.comingSoonBadgeText}>Upcoming</Text>
-                </View>
-              </View>
-              <Text style={styles.moduleSubtitle}>
-                Real-time rule & anomaly evaluation
-              </Text>
-            </View>
+            <Text style={styles.actionLabel}>142</Text>
+            <Text style={styles.actionDescription}>SMS Scanned</Text>
           </View>
-          <Text style={styles.moduleDescription}>
-            Transaction monitoring, risk scoring algorithms, and security alerts
-            will be active on this dashboard in the next release.
-          </Text>
+          <View style={[styles.actionCard, Shadows.card]}>
+            <View style={[styles.actionIconBox, {backgroundColor: '#F3E8FF'}]}>
+              <Icon name="Link" size={20} color="#7C3AED" />
+            </View>
+            <Text style={styles.actionLabel}>38</Text>
+            <Text style={styles.actionDescription}>URLs Checked</Text>
+          </View>
+          <View style={[styles.actionCard, Shadows.card]}>
+            <View style={[styles.actionIconBox, {backgroundColor: Colors.errorLight}]}>
+              <Icon name="AlertCircle" size={20} color={Colors.error} />
+            </View>
+            <Text style={styles.actionLabel}>5</Text>
+            <Text style={styles.actionDescription}>Threats Found</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

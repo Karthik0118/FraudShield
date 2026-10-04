@@ -18,7 +18,7 @@ export const urgencyRule = (text: string): RuleResult => {
   return {
     rule: 'URGENCY_LANGUAGE',
     triggered: hasUrgencyLanguage,
-    score: hasUrgencyLanguage ? 20 : 0,
+    score: hasUrgencyLanguage ? 15 : 0,
     reason: hasUrgencyLanguage ? 'Message contains urgency language' : undefined,
   };
 };

@@ -7,10 +7,17 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["fraud-detection", "fintech", "auth", "nodejs"],
+  "keywords": [
+    "fraud-detection",
+    "fintech",
+    "auth",
+    "nodejs"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^2.26.0",
+    "axios": "^1.20.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

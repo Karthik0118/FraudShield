@@ -37,7 +37,13 @@ export type IconName =
   | 'X'
   | 'ArrowRight'
   | 'ScanLine'
-  | 'MessageSquare';
+  | 'MessageSquare'
+  | 'Cpu'
+  | 'Trash2'
+  | 'Inbox'
+  | 'Globe'
+  | 'Search'
+  | 'Link';
 
 export interface IconProps {
   name: IconName;
@@ -146,6 +152,7 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'Cpu':
       case 'Settings':
         return (
           <View style={iconStyles.canvas}>
@@ -307,6 +314,8 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'MessageSquare':
+      case 'Inbox':
       case 'Mail':
         return (
           <View style={iconStyles.canvas}>
@@ -383,6 +392,7 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'Globe':
       case 'Eye':
         return (
           <View style={iconStyles.canvas}>
@@ -916,6 +926,7 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'Trash2':
       case 'X':
         return (
           <View style={iconStyles.canvas}>
@@ -944,6 +955,7 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'Link':
       case 'ArrowRight':
         return (
           <View style={iconStyles.canvas}>
@@ -973,6 +985,7 @@ export const Icon: React.FC<IconProps> = ({
           </View>
         );
 
+      case 'Search':
       case 'ScanLine':
         return (
           <View style={iconStyles.canvas}>
