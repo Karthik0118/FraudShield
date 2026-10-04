@@ -229,7 +229,7 @@ public class OverlayManager {
         badgePill.setBackground(badgeBg);
 
         TextView badgeText = new TextView(context);
-        badgeText.setText("⚠️ INSECURE HTTP DETECTED");
+        badgeText.setText("⚠️ FRAUDSHIELD ALERT");
         badgeText.setTextColor(Color.parseColor("#DC2626"));
         badgeText.setTextSize(12);
         badgeText.setTypeface(Typeface.DEFAULT_BOLD);

@@ -14,7 +14,8 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
-import SmsDetectionScreen from '../screens/sms/SmsDetectionScreen';
+import DetectScreen from '../screens/detect/DetectScreen';
+import HistoryScreen from '../screens/history/HistoryScreen';
 import {Colors, Typography, Spacing, Shadows} from '../theme/theme';
 import Icon, {IconName} from '../components/Icon';
 
@@ -32,8 +33,12 @@ export type SettingsStackParamList = {
   ChangePassword: undefined;
 };
 
-export type SmsStackParamList = {
-  SmsDetectionMain: undefined;
+export type DetectStackParamList = {
+  DetectMain: undefined;
+};
+
+export type HistoryStackParamList = {
+  HistoryMain: undefined;
 };
 
 // ─── Tab Icon Component ─────────────────────────────────────────────────────
@@ -118,14 +123,24 @@ const SettingsStackScreen: React.FC = () => (
   </SettingsStack.Navigator>
 );
 
-// ─── SMS Stack ───────────────────────────────────────────────────────────────
+// ─── Detect Stack ───────────────────────────────────────────────────────────
 
-const SmsStack = createNativeStackNavigator<SmsStackParamList>();
+const DetectStack = createNativeStackNavigator<DetectStackParamList>();
 
-const SmsStackScreen: React.FC = () => (
-  <SmsStack.Navigator screenOptions={{headerShown: false, ...stackScreenOptions}}>
-    <SmsStack.Screen name="SmsDetectionMain" component={SmsDetectionScreen} />
-  </SmsStack.Navigator>
+const DetectStackScreen: React.FC = () => (
+  <DetectStack.Navigator screenOptions={{headerShown: false, ...stackScreenOptions}}>
+    <DetectStack.Screen name="DetectMain" component={DetectScreen} />
+  </DetectStack.Navigator>
+);
+
+// ─── History Stack ──────────────────────────────────────────────────────────
+
+const HistoryStack = createNativeStackNavigator<HistoryStackParamList>();
+
+const HistoryStackScreen: React.FC = () => (
+  <HistoryStack.Navigator screenOptions={{headerShown: false, ...stackScreenOptions}}>
+    <HistoryStack.Screen name="HistoryMain" component={HistoryScreen} />
+  </HistoryStack.Navigator>
 );
 
 // ─── Bottom Tab Navigator ───────────────────────────────────────────────────
@@ -155,11 +170,21 @@ const AppNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="Detect"
-        component={SmsStackScreen}
+        component={DetectStackScreen}
         options={{
           tabBarLabel: 'Detect',
           tabBarIcon: ({focused}) => (
             <TabBarIcon name="ScanLine" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="History"
+        component={HistoryStackScreen}
+        options={{
+          tabBarLabel: 'History',
+          tabBarIcon: ({focused}) => (
+            <TabBarIcon name="Clock" focused={focused} />
           ),
         }}
       />

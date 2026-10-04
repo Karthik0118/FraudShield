@@ -26,6 +26,8 @@ import Icon from '../../components/Icon';
 import smsApi from '../../api/smsApi';
 import {SmsDetectData} from '../../types/sms';
 import {extractApiError} from '../../utils/errorHandler';
+import AiAnalysisCard from '../../components/AiAnalysisCard';
+import {detectionApi} from '../../api/detectionApi';
 
 // ─── Sample SMS Messages ──────────────────────────────────────────────────────
 const SAMPLE_MESSAGES = [
@@ -84,6 +86,26 @@ const SmsDetectionScreen: React.FC = () => {
       const response = await smsApi.detect({text: trimmed});
       setResult(response.data);
       animateResult();
+      
+      try {
+        await detectionApi.create({
+          type: 'SMS',
+          input: trimmed,
+          preview: trimmed.length > 50 ? trimmed.substring(0, 47) + '...' : trimmed,
+          result: response.data.prediction,
+          riskScore: response.data.fraud_probability * 100,
+          riskLevel: response.data.prediction === 'Fraudulent' ? 'HIGH_RISK' : 'SAFE',
+          model: 'DistilBERT SMS',
+          confidence: response.data.confidence,
+          detectedSignals: [],
+          reasons: [],
+          recommendation: response.data.prediction === 'Fraudulent' ? 'Do not click links or share details.' : 'Appears safe.',
+          scamType: response.data.prediction === 'Fraudulent' ? 'SMS Scam' : 'None',
+        });
+      } catch (histErr) {
+        console.log('Failed to save SMS history', histErr);
+      }
+      
     } catch (err: any) {
       const appError = extractApiError(err);
       const msg = appError.message;
@@ -122,7 +144,7 @@ const SmsDetectionScreen: React.FC = () => {
   const confPercent = result ? Math.round((result.confidence ?? 0) * 100) : 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -377,10 +399,12 @@ const SmsDetectionScreen: React.FC = () => {
                 important messages.
               </Text>
             </View>
-          </Animated.View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          
+          <AiAnalysisCard detectionData={result} type="SMS" />
+        </Animated.View>
+      )}
+    </ScrollView>
+    </View>
   );
 };
 

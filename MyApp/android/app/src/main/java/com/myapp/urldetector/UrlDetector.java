@@ -8,23 +8,26 @@ import java.util.regex.Pattern;
 /**
  * UrlDetector
  *
- * Local Java utility to detect unencrypted, insecure HTTP URLs from accessible text.
- * Strictly ignores secure HTTPS URLs.
+ * Local Java utility to detect HTTP and HTTPS URLs from text.
+ * Both HTTP and HTTPS URLs are extracted so the backend URL analyzer
+ * can properly score them using its full set of risk signals.
+ *
+ * HTTP-only is NOT automatically considered malicious — the backend
+ * URL analyzer determines the actual risk based on multiple signals.
  */
 public class UrlDetector {
 
-    // Matches ONLY http:// (specifically excludes https://)
-    private static final Pattern INSECURE_HTTP_PATTERN = Pattern.compile(
-        "http://[a-zA-Z0-9.-]+(?:\\.[a-zA-Z]{2,})+(?::\\d{1,5})?(?:/[^\\s<>\"'\\[\\]{}]*)?",
+    // Matches both http:// and https:// URLs
+    private static final Pattern URL_PATTERN = Pattern.compile(
+        "https?://[a-zA-Z0-9.-]+(?:\\.[a-zA-Z]{2,})+(?::\\d{1,5})?(?:/[^\\s<>\"'\\[\\]{}]*)?",
         Pattern.CASE_INSENSITIVE
     );
 
     /**
-     * Extracts only insecure HTTP URLs present in the provided text.
-     * Secure HTTPS URLs are explicitly filtered out and ignored.
+     * Extracts all HTTP and HTTPS URLs present in the provided text.
      *
      * @param text Input string from accessibility node
-     * @return List of matched insecure HTTP URLs
+     * @return List of matched URLs (both HTTP and HTTPS)
      */
     public static List<String> extractUrls(CharSequence text) {
         List<String> urls = new ArrayList<>();
@@ -33,7 +36,7 @@ public class UrlDetector {
         }
 
         try {
-            Matcher matcher = INSECURE_HTTP_PATTERN.matcher(text);
+            Matcher matcher = URL_PATTERN.matcher(text);
             while (matcher.find()) {
                 String matched = matcher.group().trim();
                 // Clean trailing punctuation if accidentally captured
@@ -41,12 +44,8 @@ public class UrlDetector {
                     matched = matched.substring(0, matched.length() - 1);
                 }
 
-                // Explicit double check: strictly insecure http:// only, never https://
-                String lower = matched.toLowerCase();
-                if (lower.startsWith("http://") && !lower.startsWith("https://")) {
-                    if (matched.length() > 0 && !urls.contains(matched)) {
-                        urls.add(matched);
-                    }
+                if (matched.length() > 0 && !urls.contains(matched)) {
+                    urls.add(matched);
                 }
             }
         } catch (Exception ignored) {
