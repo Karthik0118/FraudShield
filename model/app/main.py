@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from app.config import FRAUD_THRESHOLD, MAX_TEXT_LENGTH, MODEL_ID
 from app.model import classifier
 from app.schemas import PredictRequest, PredictResponse
+from app.transaction.inference import transaction_detector
+from app.transaction.routes import router as transaction_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,19 +22,25 @@ logger = logging.getLogger("fraud.api")
 async def lifespan(_app: FastAPI):
     logger.info("Starting application. Loading text fraud model once into memory.")
     classifier.load()
+    logger.info("Loading transaction fraud detector.")
+    transaction_detector.load()
     yield
-    logger.info("Shutting down text fraud service.")
+    logger.info("Shutting down fraud detection service.")
 
 
 app = FastAPI(
-    title="Fraud Text Classification API",
+    title="FraudShield ML API",
     description=(
-        "Prototype ML service that classifies a message as FRAUD or NOT_FRAUD. "
-        "This is the first stage of a larger pipeline (text model → URL detection → risk engine)."
+        "ML service providing text fraud classification (BERT) and "
+        "transaction behavioral fraud detection (GAT + CNN). "
+        "Part of a larger pipeline (text model → transaction model → URL detection → risk engine)."
     ),
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
+
+# ── Mount transaction fraud detection routes ──────────────────────────────────
+app.include_router(transaction_router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -68,6 +76,11 @@ def health():
         "model_loaded": classifier.is_ready(),
         "model_id": MODEL_ID,
         "fraud_threshold": FRAUD_THRESHOLD,
+        "transaction_model": {
+            "loaded": transaction_detector.is_ready(),
+            "version": transaction_detector._model_version,
+            "using_fallback": transaction_detector._using_fallback,
+        },
     }
 
 
