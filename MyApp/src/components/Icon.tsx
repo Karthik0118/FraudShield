@@ -25,6 +25,7 @@ export type IconName =
   | 'ChevronRight'
   | 'ChevronLeft'
   | 'AlertCircle'
+  | 'AlertTriangle'
   | 'CheckCircle2'
   | 'Check'
   | 'KeyRound'
@@ -43,7 +44,16 @@ export type IconName =
   | 'Inbox'
   | 'Globe'
   | 'Search'
-  | 'Link';
+  | 'Link'
+  | 'Plus'
+  | 'Minus'
+  | 'DollarSign'
+  | 'CreditCard'
+  | 'ChevronDown'
+  | 'ChevronUp'
+  | 'TrendingUp'
+  | 'Zap'
+  | 'Target';
 
 export interface IconProps {
   name: IconName;
@@ -1083,6 +1093,322 @@ export const Icon: React.FC<IconProps> = ({
                 borderBottomWidth: strokeWidth,
                 borderColor: color,
                 transform: [{rotate: '0deg'}],
+              }}
+            />
+          </View>
+        );
+
+      case 'AlertTriangle':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Triangle */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 4,
+                left: 4,
+                width: 16,
+                height: 16,
+                borderLeftWidth: strokeWidth,
+                borderBottomWidth: strokeWidth,
+                borderColor: color,
+                transform: [{rotate: '45deg'}],
+                borderBottomLeftRadius: 2,
+              }}
+            />
+            {/* Exclamation */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 9,
+                left: 11,
+                width: 2,
+                height: 4,
+                backgroundColor: color,
+                borderRadius: 1,
+              }}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 5,
+                left: 11,
+                width: 2,
+                height: 2,
+                borderRadius: 1,
+                backgroundColor: color,
+              }}
+            />
+          </View>
+        );
+
+      case 'Plus':
+        return (
+          <View style={iconStyles.canvas}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: 11,
+                width: 2,
+                height: 14,
+                backgroundColor: color,
+                borderRadius: 1,
+              }}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                top: 11,
+                left: 5,
+                width: 14,
+                height: 2,
+                backgroundColor: color,
+                borderRadius: 1,
+              }}
+            />
+          </View>
+        );
+
+      case 'Minus':
+        return (
+          <View style={iconStyles.canvas}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 11,
+                left: 5,
+                width: 14,
+                height: 2,
+                backgroundColor: color,
+                borderRadius: 1,
+              }}
+            />
+          </View>
+        );
+
+      case 'DollarSign':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Vertical line */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                left: 11,
+                width: 2,
+                height: 18,
+                backgroundColor: color,
+                borderRadius: 1,
+              }}
+            />
+            {/* Top curve */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 6,
+                left: 7,
+                width: 10,
+                height: 5,
+                borderTopWidth: strokeWidth,
+                borderLeftWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+                borderTopLeftRadius: 5,
+                borderTopRightRadius: 5,
+              }}
+            />
+            {/* Bottom curve */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 6,
+                left: 7,
+                width: 10,
+                height: 5,
+                borderBottomWidth: strokeWidth,
+                borderLeftWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+                borderBottomLeftRadius: 5,
+                borderBottomRightRadius: 5,
+              }}
+            />
+          </View>
+        );
+
+      case 'CreditCard':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Card body */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: 3,
+                width: 18,
+                height: 14,
+                borderRadius: 3,
+                borderWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Stripe */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 10,
+                left: 3,
+                width: 18,
+                height: strokeWidth,
+                backgroundColor: color,
+              }}
+            />
+          </View>
+        );
+
+      case 'ChevronDown':
+        return (
+          <View style={iconStyles.canvas}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                width: 8,
+                height: 8,
+                borderBottomWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+                transform: [{rotate: '45deg'}],
+              }}
+            />
+          </View>
+        );
+
+      case 'ChevronUp':
+        return (
+          <View style={iconStyles.canvas}>
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 8,
+                left: 8,
+                width: 8,
+                height: 8,
+                borderTopWidth: strokeWidth,
+                borderLeftWidth: strokeWidth,
+                borderColor: color,
+                transform: [{rotate: '45deg'}],
+              }}
+            />
+          </View>
+        );
+
+      case 'TrendingUp':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Trend line */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 11,
+                left: 3,
+                width: 18,
+                height: strokeWidth,
+                backgroundColor: color,
+                transform: [{rotate: '-20deg'}],
+              }}
+            />
+            {/* Arrow head */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 6,
+                right: 3,
+                width: 7,
+                height: 7,
+                borderTopWidth: strokeWidth,
+                borderRightWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+          </View>
+        );
+
+      case 'Zap':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Lightning bolt top */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                left: 8,
+                width: 8,
+                height: 10,
+                borderLeftWidth: strokeWidth,
+                borderBottomWidth: strokeWidth,
+                borderColor: color,
+                transform: [{skewX: '-15deg'}],
+              }}
+            />
+            {/* Lightning bolt bottom */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 3,
+                left: 10,
+                width: 6,
+                height: 8,
+                borderRightWidth: strokeWidth,
+                borderTopWidth: strokeWidth,
+                borderColor: color,
+                transform: [{skewX: '-15deg'}],
+              }}
+            />
+          </View>
+        );
+
+      case 'Target':
+        return (
+          <View style={iconStyles.canvas}>
+            {/* Outer circle */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 3,
+                left: 3,
+                width: 18,
+                height: 18,
+                borderRadius: 9,
+                borderWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Inner circle */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 7,
+                left: 7,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                borderWidth: strokeWidth,
+                borderColor: color,
+              }}
+            />
+            {/* Center dot */}
+            <View
+              style={{
+                position: 'absolute',
+                top: 10,
+                left: 10,
+                width: 4,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: color,
               }}
             />
           </View>

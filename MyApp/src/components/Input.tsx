@@ -116,8 +116,8 @@ const Input: React.FC<InputProps> = ({
         <TextInput
           style={[
             styles.input,
-            leftIcon && styles.inputWithIcon,
-            disabled && styles.inputDisabled,
+            leftIcon ? styles.inputWithIcon : undefined,
+            disabled ? styles.inputDisabled : undefined,
           ]}
           placeholderTextColor={Colors.placeholder}
           editable={!disabled}

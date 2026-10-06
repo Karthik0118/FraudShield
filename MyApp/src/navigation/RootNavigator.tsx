@@ -22,6 +22,7 @@ const RootNavigator: React.FC = () => {
       <>
         <StatusBar
           barStyle="dark-content"
+          // @ts-ignore: backgroundColor is valid on Android but may be missing in types
           backgroundColor={Colors.background}
         />
         <LoadingScreen />
@@ -29,10 +30,29 @@ const RootNavigator: React.FC = () => {
     );
   }
 
+  const linking: any = {
+    prefixes: ['fraudshield://'],
+    config: {
+      screens: {
+        Detect: {
+          screens: {
+            DetectMain: 'realtime_result',
+          },
+        },
+        Settings: {
+          screens: {
+            DeviceSecurity: 'device_security',
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <StatusBar
         barStyle="dark-content"
+        // @ts-ignore: backgroundColor is valid on Android but may be missing in types
         backgroundColor={Colors.background}
       />
       {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}

@@ -30,6 +30,8 @@ import {
   openOverlaySettings,
   ServiceStatus,
 } from '../../utils/accessibilityService';
+import DeviceSecurityBridge, {evaluateDeviceSecurity} from '../../services/DeviceSecurityBridge';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface QuickAction {
   id: string;
@@ -55,6 +57,32 @@ const HomeScreen: React.FC = () => {
     if (Platform.OS === 'android') {
       const status = await checkAllServiceStatus();
       setServiceStatus(status);
+
+      // Background device security check
+      try {
+        const scanResult = await DeviceSecurityBridge.runSecurityScan();
+        if (scanResult) {
+          const assessment = evaluateDeviceSecurity(scanResult);
+          
+          if (assessment.riskLevel === 'HIGH' || assessment.riskLevel === 'CRITICAL') {
+            const lastWarnedTimeStr = await AsyncStorage.getItem('last_security_warning_time');
+            const lastWarnedTime = lastWarnedTimeStr ? parseInt(lastWarnedTimeStr, 10) : 0;
+            const now = Date.now();
+            
+            // Only warn at most once every 6 hours (21600000 ms) to avoid notification spam
+            if (now - lastWarnedTime > 21600000) {
+              await DeviceSecurityBridge.showSecurityAlert(
+                '🛡️ FraudShield Alert',
+                'Possible device security compromise detected. Tap to review.',
+                assessment.riskLevel
+              );
+              await AsyncStorage.setItem('last_security_warning_time', now.toString());
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Background security check failed', e);
+      }
     }
   }, []);
 
@@ -122,6 +150,17 @@ const HomeScreen: React.FC = () => {
       iconColor: '#7C3AED',
       label: 'Check URL',
       description: 'Analyse links',
+      onPress: () => {
+        navigation.dispatch(CommonActions.navigate({name: 'Detect'}));
+      },
+    },
+    {
+      id: 'transaction',
+      icon: 'CreditCard',
+      iconBg: '#FEF3C7',
+      iconColor: '#D97706',
+      label: 'Check Txn',
+      description: 'Analyse transactions',
       onPress: () => {
         navigation.dispatch(CommonActions.navigate({name: 'Detect'}));
       },

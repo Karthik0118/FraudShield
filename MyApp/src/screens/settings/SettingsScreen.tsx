@@ -91,6 +91,33 @@ const SettingsScreen: React.FC = () => {
       ],
     },
     {
+      title: 'Protection Settings',
+      items: [
+        {
+          id: 'device_security',
+          icon: 'ShieldCheck',
+          iconBg: '#ECFDF5',
+          iconColor: '#10B981',
+          label: 'Device Security',
+          description: 'Scan and secure your device',
+          onPress: () => {
+            navigation.navigate('DeviceSecurity' as any);
+          },
+        },
+        {
+          id: 'realtime_protection',
+          icon: 'Shield',
+          iconBg: Colors.primaryFaded,
+          iconColor: Colors.primary,
+          label: 'Real-Time Protection',
+          description: 'Automatic payment monitoring',
+          onPress: () => {
+            navigation.navigate('RealTimeProtection' as any);
+          },
+        },
+      ],
+    },
+    {
       title: 'About Application',
       items: [
         {

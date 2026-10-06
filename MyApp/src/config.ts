@@ -13,6 +13,10 @@ const Config = {
   // Production: https://your-production-api.com
   API_BASE_URL: 'http://127.0.0.1:5000',
 
+  // Transaction GCN ML Model URL (FastAPI on port 8000)
+  // Physical device: adb reverse tcp:8000 tcp:8000
+  TRANSACTION_ML_URL: 'http://127.0.0.1:8000',
+
 
   // App metadata
   APP_NAME: 'FraudShield',

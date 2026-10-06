@@ -17,7 +17,7 @@ import {useFocusEffect} from '@react-navigation/native';
 const HistoryScreen: React.FC = () => {
   const [history, setHistory] = useState<Detection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'ALL' | 'SMS' | 'URL' | 'HIGH RISK' | 'SAFE'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'SMS' | 'URL' | 'TRANSACTION' | 'HIGH RISK' | 'SAFE'>('ALL');
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -66,6 +66,7 @@ const HistoryScreen: React.FC = () => {
     if (filter === 'ALL') return true;
     if (filter === 'SMS') return item.type === 'SMS';
     if (filter === 'URL') return item.type === 'URL';
+    if (filter === 'TRANSACTION') return item.type === 'TRANSACTION';
     if (filter === 'HIGH RISK') return item.riskLevel === 'HIGH_RISK';
     if (filter === 'SAFE') return item.riskLevel === 'SAFE';
     return true;
@@ -92,7 +93,7 @@ const HistoryScreen: React.FC = () => {
       <View style={[styles.card, Shadows.card]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardTypeBox}>
-            <Icon name={item.type === 'SMS' ? 'MessageSquare' : 'Link'} size={14} color={Colors.textSecondary} />
+            <Icon name={item.type === 'SMS' ? 'MessageSquare' : item.type === 'TRANSACTION' ? 'CreditCard' : 'Link'} size={14} color={Colors.textSecondary} />
             <Text style={styles.cardType}>{item.type}</Text>
           </View>
           <Text style={styles.cardDate}>
@@ -126,7 +127,7 @@ const HistoryScreen: React.FC = () => {
 
       <View style={styles.filters}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          {['ALL', 'SMS', 'URL', 'HIGH RISK', 'SAFE'].map((f) => (
+          {['ALL', 'SMS', 'URL', 'TRANSACTION', 'HIGH RISK', 'SAFE'].map((f) => (
             <TouchableOpacity
               key={f}
               style={[styles.filterChip, filter === f && styles.filterChipActive]}

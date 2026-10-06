@@ -241,7 +241,45 @@ const App: React.FC = () => {
       }
     );
 
-    return () => subscription.remove();
+    const realtimeTxnSubscription = DeviceEventEmitter.addListener(
+      'onRealtimeTransaction',
+      async (payloadStr: string) => {
+        try {
+          const payload = typeof payloadStr === 'string' ? JSON.parse(payloadStr) : payloadStr;
+          console.log('[REALTIME TXN]', payload);
+          
+          const amountText = `₹${Number(payload.amount).toLocaleString('en-IN')}`;
+          await fetch(`${Config.API_BASE_URL}/api/detections`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${await authStorage.getAccessToken()}`,
+            },
+            body: JSON.stringify({
+              type: 'TRANSACTION',
+              input: JSON.stringify({ amount: payload.amount, receiver_id: payload.receiver }),
+              preview: `${amountText} → ${payload.receiver} (${payload.sourceApp})`,
+              result: payload.riskLevel === 'LOW' ? 'Legitimate' : 'Fraudulent',
+              riskScore: payload.fraudProbability * 100,
+              riskLevel: payload.riskLevel === 'HIGH' ? 'HIGH_RISK' : payload.riskLevel === 'MEDIUM' ? 'SUSPICIOUS' : 'SAFE',
+              model: 'GCN Real-Time',
+              confidence: 1 - payload.fraudProbability,
+              detectedSignals: [],
+              reasons: [],
+              recommendation: payload.riskLevel === 'LOW' ? 'Transaction appears safe.' : 'Review this transaction carefully before proceeding.',
+              scamType: payload.riskLevel === 'LOW' ? 'None' : 'Suspicious Transaction',
+            }),
+          });
+        } catch (err) {
+          console.log('[REALTIME TXN ERROR]', err);
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+      realtimeTxnSubscription.remove();
+    };
   }, []);
 
   function showOverlay(title: string, explanation: string, content: string) {

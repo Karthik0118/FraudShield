@@ -7,6 +7,8 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.myapp.urldetector.AccessibilityPackage
+import com.myapp.realtimeprotection.RealTimeProtectionPackage
+import com.myapp.devicesecurity.DeviceSecurityPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -16,6 +18,8 @@ class MainApplication : Application(), ReactApplication {
       packageList =
         PackageList(this).packages.apply {
           add(AccessibilityPackage())
+          add(RealTimeProtectionPackage())
+          add(DeviceSecurityPackage())
         },
     )
   }

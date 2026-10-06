@@ -15,6 +15,8 @@ import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
 import DetectScreen from '../screens/detect/DetectScreen';
+import RealTimeProtectionScreen from '../screens/realtime/RealTimeProtectionScreen';
+import DeviceSecurityScreen from '../screens/settings/DeviceSecurityScreen';
 import HistoryScreen from '../screens/history/HistoryScreen';
 import {Colors, Typography, Spacing, Shadows} from '../theme/theme';
 import Icon, {IconName} from '../components/Icon';
@@ -31,6 +33,8 @@ export type ProfileStackParamList = {
 export type SettingsStackParamList = {
   SettingsMain: undefined;
   ChangePassword: undefined;
+  RealTimeProtection: undefined;
+  DeviceSecurity: undefined;
 };
 
 export type DetectStackParamList = {
@@ -119,6 +123,16 @@ const SettingsStackScreen: React.FC = () => (
       name="ChangePassword"
       component={ChangePasswordScreen}
       options={{title: 'Change Password', headerBackTitle: 'Settings'}}
+    />
+    <SettingsStack.Screen
+      name="RealTimeProtection"
+      component={RealTimeProtectionScreen}
+      options={{title: 'Real-Time Protection', headerBackTitle: 'Settings'}}
+    />
+    <SettingsStack.Screen
+      name="DeviceSecurity"
+      component={DeviceSecurityScreen}
+      options={{title: 'Device Security', headerBackTitle: 'Settings'}}
     />
   </SettingsStack.Navigator>
 );

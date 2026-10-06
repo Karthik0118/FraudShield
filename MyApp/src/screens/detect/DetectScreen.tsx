@@ -2,43 +2,62 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors, Typography, Spacing, Shadows} from '../../theme/theme';
+import {useRoute, RouteProp, useFocusEffect} from '@react-navigation/native';
 import SmsDetectionScreen from '../sms/SmsDetectionScreen';
 import UrlDetectionScreen from '../url/UrlDetectionScreen';
+import TransactionDetectionScreen from '../transaction/TransactionDetectionScreen';
+
+type TabKey = 'SMS' | 'URL' | 'TXN';
 
 const DetectScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'SMS' | 'URL'>('SMS');
+  const route = useRoute<RouteProp<Record<string, any>, string>>();
+  const [activeTab, setActiveTab] = useState<TabKey>('SMS');
+  const [txnInitialParams, setTxnInitialParams] = useState<any>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params && route.params.amount) {
+        setActiveTab('TXN');
+        setTxnInitialParams(route.params);
+      }
+    }, [route.params])
+  );
+
+  const tabs: {key: TabKey; label: string}[] = [
+    {key: 'SMS', label: 'SMS'},
+    {key: 'URL', label: 'URL'},
+    {key: 'TXN', label: 'Transaction'},
+  ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.tabContainer}>
         <View style={styles.tabBackground}>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'SMS' && styles.activeTab]}
-            onPress={() => setActiveTab('SMS')}>
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'SMS' && styles.activeTabText,
-              ]}>
-              SMS Scanner
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'URL' && styles.activeTab]}
-            onPress={() => setActiveTab('URL')}>
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'URL' && styles.activeTabText,
-              ]}>
-              URL Scanner
-            </Text>
-          </TouchableOpacity>
+          {tabs.map(tab => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tabButton, activeTab === tab.key && styles.activeTab]}
+              onPress={() => setActiveTab(tab.key)}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab.key && styles.activeTabText,
+                ]}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
       <View style={styles.content}>
-        {activeTab === 'SMS' ? <SmsDetectionScreen /> : <UrlDetectionScreen />}
+        {activeTab === 'SMS' ? (
+          <SmsDetectionScreen />
+        ) : activeTab === 'URL' ? (
+          <UrlDetectionScreen />
+        ) : (
+          <TransactionDetectionScreen initialParams={txnInitialParams} />
+        )}
       </View>
     </SafeAreaView>
   );
